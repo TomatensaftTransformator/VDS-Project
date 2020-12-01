@@ -10,3 +10,4 @@ job:
     - cmake ..
     - make -j
     - ./unit_tests
+
