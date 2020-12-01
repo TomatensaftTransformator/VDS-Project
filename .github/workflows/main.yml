@@ -25,14 +25,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      -run:
-       name: Run a script
-       command: |
-         apt-get update
-         apt-get install -y git cmake g++
-         git submodule update --init --recursive
-         mkdir build
-         cd build
-         make -j
-       
+      - run: |
+          apt-get update
+          apt-get install --init --recursive
+          git submodule update --init --recursive
+          mkdir build
+          cd build
+          make -j
+
