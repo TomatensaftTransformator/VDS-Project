@@ -1,5 +1,3 @@
-image: ubuntu:14.04
-
 job:
   script:
     - apt-get update
