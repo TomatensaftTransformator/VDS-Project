@@ -27,7 +27,7 @@ jobs:
 
       - run: |
           apt-get update
-          apt-get install --init --recursive
+          apt-get install -y git cmake g++
           git submodule update --init --recursive
           mkdir build
           cd build
