@@ -1,11 +1,11 @@
 job:
   script:
-    - apt-get update
-    - apt-get install -y git cmake g++
+    - sudo apt-get update
+    - sudo apt-get install -y git cmake g++
     - git submodule update --init --recursive
     - mkdir build
     - cd build
     - cmake ..
     - make -j
-    - ./unit_tests
+    - ./src/test/VDSProject_test
 
