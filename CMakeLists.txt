@@ -3,20 +3,28 @@ project(VDSProject CXX C)
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ${LLVM_CXX_FLAGS} ")
 
 
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.10.0
-)
-FetchContent_MakeAvailable(googletest)
-
-enable_testing()
 
 
-# Locate GTest
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+set(GOOGLETEST_ROOT external/googletest/googletest CACHE STRING "Google Test source root")
+
+include_directories(
+    ${PROJECT_SOURCE_DIR}/${GOOGLETEST_ROOT}
+    ${PROJECT_SOURCE_DIR}/${GOOGLETEST_ROOT}/include
+    )
+
+set(GOOGLETEST_SOURCES
+    ${PROJECT_SOURCE_DIR}/${GOOGLETEST_ROOT}/src/gtest-all.cc
+    ${PROJECT_SOURCE_DIR}/${GOOGLETEST_ROOT}/src/gtest_main.cc
+    )
+
+foreach(_source ${GOOGLETEST_SOURCES})
+    set_source_files_properties(${_source} PROPERTIES GENERATED 1)
+endforeach()
+
+add_library(googletest ${GOOGLETEST_SOURCES})
+
+
+
 
 
 #Include dirs
