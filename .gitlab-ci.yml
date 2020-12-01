@@ -1,0 +1,12 @@
+image: ubuntu:14.04
+
+job:
+  script:
+    - apt-get update
+    - apt-get install -y git cmake g++
+    - git submodule update --init --recursive
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j
+    - ./unit_tests
