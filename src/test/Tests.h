@@ -37,33 +37,15 @@ struct ManagerTest: testing::Test {
 
 
 
-TEST(DataStructureTest, Test_IDs) {
-    ClassProject::ManagerImplementation manager;
-    ClassProject::Unique_identifier id1;
-    ClassProject::Unique_identifier id2;
-    manager.init();
-    Unique_identifier_EQ(id1, id2);
-}
-
-
-TEST(DataStructureTest, Test_Entries) {
-    ClassProject::Unique_table_entry entry1;
-    ClassProject::Unique_table_entry entry2;
-    Unique_table_entry_EQ(entry1, entry2);
-}
-
-
-
-
 TEST(InitializeTest, unique_table_size) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
+    //manager.init();
     EXPECT_EQ(manager.uniqueTableSize(), 2);
 }
 
 TEST(InitializeTest, true_entry) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
+
 
     ClassProject::Unique_identifier TRUE_identifier;
     TRUE_identifier.id_high = ClassProject::ID_TRUE;
@@ -85,7 +67,7 @@ TEST(InitializeTest, true_entry) {
 
 TEST(InitializeTest, false_entry) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
+
 
     ClassProject::Unique_identifier FALSE_identifier;
     FALSE_identifier.id_high = ClassProject::ID_FALSE;
@@ -109,7 +91,6 @@ TEST(InitializeTest, false_entry) {
 
 TEST(ManagerTest, uniqueTableSizeTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
 
     size_t s = manager.uniqueTableSize();
     manager.createVar("a");
@@ -123,9 +104,10 @@ TEST(ManagerTest, uniqueTableSizeTest) {
     EXPECT_EQ(manager.uniqueTableSize(), s);
 }
 
+
+
 TEST(ManagerTest, ID_TRUE_FALSE) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
 
 
     EXPECT_EQ(manager.True(), 1);
@@ -137,7 +119,6 @@ TEST(ManagerTest, ID_TRUE_FALSE) {
 
 TEST(ManagerTest, topVarTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -164,7 +145,6 @@ TEST(ManagerTest, topVarTest) {
 
 TEST(ManagerTest, iteTermincalCasesTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
 
     //test the pure boolean cases first
     EXPECT_EQ(manager.ite(0,0,0), 0);
@@ -202,7 +182,6 @@ TEST(ManagerTest, iteTermincalCasesTest) {
 
 TEST(ManagerTest, createVarTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     
@@ -272,9 +251,8 @@ TEST(ManagerTest, createVarTest) {
 
 
 
-TEST(ManagerTest, iteORTest) {
+TEST(ManagerTest, OrTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -286,7 +264,6 @@ TEST(ManagerTest, iteORTest) {
     identifier_result.id_high = ClassProject::ID_TRUE;
     identifier_result.id_low  = id_b;
     identifier_result.top_var = "a";
-    //(a,1,3)
 
     Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
 
@@ -300,7 +277,6 @@ TEST(ManagerTest, iteORTest) {
     identifier_result.id_high = ClassProject::ID_TRUE;
     identifier_result.id_low  = id_b;
     identifier_result.top_var = "a";
-    //(a,3,0)
 
     Unique_identifier_EQ(manager.get_table_entry(result_id2).identifier, identifier_result);
 
@@ -311,7 +287,6 @@ TEST(ManagerTest, iteORTest) {
     identifier_result.id_high = ClassProject::ID_TRUE;
     identifier_result.id_low  = ClassProject::ID_TRUE;
     identifier_result.top_var = "1";
-    //(a,3,0)
 
     Unique_identifier_EQ(manager.get_table_entry(result_id3).identifier, identifier_result);
 
@@ -330,26 +305,24 @@ TEST(ManagerTest, iteORTest) {
 
 
 
-TEST(ManagerTest, iteANDTest) {
+TEST(ManagerTest, AndTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
 
-    //and(a,b) = ite(a, b, 0)
+
+
     ClassProject::BDD_ID result_id = manager.and2(id_a, id_b);
 
     ClassProject::Unique_identifier identifier_result;
     identifier_result.id_high = id_b;
     identifier_result.id_low  = ClassProject::ID_FALSE;
     identifier_result.top_var = "a";
-    //(a,3,0)
 
     Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
 
 
-    //and(a,b) = ite(b, a, 0)
     ClassProject::BDD_ID result_id2 = manager.and2(id_b, id_a);
 
     EXPECT_EQ(result_id, result_id2);
@@ -358,7 +331,6 @@ TEST(ManagerTest, iteANDTest) {
     identifier_result.id_high = id_b;
     identifier_result.id_low  = ClassProject::ID_FALSE;
     identifier_result.top_var = "a";
-    //(a,3,0)
 
     Unique_identifier_EQ(manager.get_table_entry(result_id2).identifier, identifier_result);
 
@@ -369,7 +341,6 @@ TEST(ManagerTest, iteANDTest) {
     identifier_result.id_high = ClassProject::ID_TRUE;
     identifier_result.id_low  = ClassProject::ID_FALSE;
     identifier_result.top_var = "b";
-    //(a,3,0)
 
     Unique_identifier_EQ(manager.get_table_entry(result_id3).identifier, identifier_result);
 }
@@ -378,7 +349,6 @@ TEST(ManagerTest, iteANDTest) {
 
 TEST(ManagerTest, NegationTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -391,7 +361,6 @@ TEST(ManagerTest, NegationTest) {
     identifier_result.id_high = ClassProject::ID_FALSE;
     identifier_result.id_low  = ClassProject::ID_TRUE;
     identifier_result.top_var = "a";
-    //(a,3,0)
 
     Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
 
@@ -402,12 +371,20 @@ TEST(ManagerTest, NegationTest) {
     identifier_result.id_high = ClassProject::ID_FALSE;
     identifier_result.id_low  = ClassProject::ID_TRUE;
     identifier_result.top_var = "b";
-    //(a,3,0)
 
     Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
 
 
+    id_result = manager.neg(0);
+    result_entry = manager.get_table_entry(id_result);
 
+    identifier_result;
+    identifier_result.id_high = ClassProject::ID_TRUE;
+    identifier_result.id_low  = ClassProject::ID_TRUE;
+    identifier_result.top_var = "1";
+
+
+    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
 }
 
 
@@ -416,13 +393,12 @@ TEST(ManagerTest, NegationTest) {
 
 TEST(ManagerTest, NandTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
+
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
 
-    //and(a,b) = ite(a, b, 0)
-    ClassProject::BDD_ID id_result = manager.nand2(id_a,id_b); //nand(2,3) = not(a) + not(b)
+    ClassProject::BDD_ID id_result = manager.nand2(id_a,id_b); //nand(a,b) = not(a) + not(b)
     //should create through recursion a entry for not b and for and(a,b).
     EXPECT_EQ(manager.uniqueTableSize(), 7);
 
@@ -430,9 +406,32 @@ TEST(ManagerTest, NandTest) {
     identifier_result.id_high = 5;  //id of not(b)
     identifier_result.id_low  = ClassProject::ID_TRUE;
     identifier_result.top_var = "a";
-    //(a,3,0)
 
     Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
+
+
+
+    id_result = manager.nand2(id_a, 0); //nand(a,0) = not(a) + not(0) = 1
+
+    identifier_result;
+    identifier_result.id_high = ClassProject::ID_TRUE;
+    identifier_result.id_low  = ClassProject::ID_TRUE;
+    identifier_result.top_var = "1";
+
+    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
+
+
+    id_result = manager.nand2(1, 1); //nand(1,1) = not(1) + not(1) = 0
+
+    identifier_result;
+    identifier_result.id_high = ClassProject::ID_FALSE;
+    identifier_result.id_low  = ClassProject::ID_FALSE;
+    identifier_result.top_var = "0";
+
+    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
+
+
+
 
 }
 
@@ -440,7 +439,7 @@ TEST(ManagerTest, NandTest) {
 
 TEST(ManagerTest, NorTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
+
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -454,21 +453,31 @@ TEST(ManagerTest, NorTest) {
     identifier_result.id_high = ClassProject::ID_FALSE;
     identifier_result.id_low  = 5;      //id of not(b)
     identifier_result.top_var = "a";
-    //(a,3,0)
 
     Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
 
+
+    id_result = manager.nor2(id_a,0); //nand(a,0) = not(a) and not(0) = not(a) and 1 = not(a)
+    //should create through recursion a entry for not b and for and(a,b).
+
+    identifier_result;
+    identifier_result.id_high = ClassProject::ID_FALSE;
+    identifier_result.id_low  = ClassProject::ID_TRUE;
+    identifier_result.top_var = "a";
+
+
+
+    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
 }
 
 
 TEST(ManagerTest, XorTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
+
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
 
-    //and(a,b) = ite(a, b, 0)
     ClassProject::BDD_ID id_result = manager.xor2(id_a,id_b); //nand(2,3) = not(a) + not(b)
     //should create through recursion a entry for not b and for and(a,b).
     EXPECT_EQ(manager.uniqueTableSize(), 9);
@@ -477,16 +486,15 @@ TEST(ManagerTest, XorTest) {
     identifier_result.id_high = 5;      //id of not(b)
     identifier_result.id_low  = 3;      //id of b
     identifier_result.top_var = "a";
-    //(a,3,0)
+
 
     Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
-
 }
 
 
 TEST(ManagerTest, UniqueTableExampleTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
+
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -505,17 +513,15 @@ TEST(ManagerTest, UniqueTableExampleTest) {
     identifier_result.id_high = 7;
     identifier_result.id_low  = 8;
     identifier_result.top_var = "a";
-    //(a,3,0)
 
     Unique_identifier_EQ(manager.get_table_entry(9).identifier, identifier_result);
-    
 }
 
 
 
 TEST(ManagerTest, findNodesTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
+
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -547,7 +553,7 @@ TEST(ManagerTest, findNodesTest) {
 
 TEST(ManagerTest, findVarsTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
+
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -580,7 +586,6 @@ TEST(ManagerTest, findVarsTest) {
 
 
     EXPECT_EQ(vars_of_root2, compare_result_set2);
-
 }
 
 
@@ -589,7 +594,7 @@ TEST(ManagerTest, findVarsTest) {
 
 TEST(ManagerTest, CoFactorTrueTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
+
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -635,19 +640,21 @@ TEST(ManagerTest, CoFactorTrueTest) {
 
 TEST(ManagerTest, DuplicateEntryTest) {
     ClassProject::ManagerImplementation manager;
-    manager.init();
 
-    manager.createVar("a");
-    manager.createVar("b");
 
-    //and(a,b) = ite(a, b, 0)
-    manager.ite(2, 3, 0.);
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+
+    manager.and2(id_a, id_b);
     size_t s = manager.uniqueTableSize();
-     //and(a,b) = ite(a, b, 0)
-    manager.ite(2, 3, 0.);
-    //size should not increase after this operation
 
 
+    manager.and2(id_a, id_b);
+    manager.and2(id_a, id_b);
+    manager.and2(id_a, id_b);
+    manager.and2(id_a, id_b);
+
+    //size should not increase after these operations
 
     EXPECT_EQ(s, manager.uniqueTableSize());
 }

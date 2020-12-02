@@ -25,11 +25,52 @@ namespace ClassProject {
 
 
     ManagerImplementation::ManagerImplementation(){
+        //here initialize data-structure
+        latest_id_value = LATEST_VALUE_INIT;
+        BDD_ID id_node_true  = ID_TRUE;   //ID of node representing TRUE always 1
+        BDD_ID id_node_false = ID_FALSE;   //ID of node representing TRUE always 0
+
+
+        
+        //add entry for TRUE into unique table
+        Unique_identifier TRUE_identifier;
+        TRUE_identifier.id_high = ID_TRUE;
+        TRUE_identifier.id_low  = ID_TRUE;
+        TRUE_identifier.top_var = "1";
+
+
+        Unique_table_entry TRUE_entry;
+        TRUE_entry.id =ID_TRUE;
+        TRUE_entry.label = "1";
+        TRUE_entry.identifier = TRUE_identifier;
+        TRUE_entry.is_variable = false;
+
+
+        auto true_entrie_pair = std::make_pair(ID_TRUE, TRUE_entry);
+        unique_table.insert (true_entrie_pair);
+        
+
+        //unique_table[ID_TRUE] = TRUE_entry;  //add new variable entry to the table
+
+
+        //add entry for FALSE into unique table
+        Unique_identifier FALSE_identifier;
+        FALSE_identifier.id_high = ID_FALSE;
+        FALSE_identifier.id_low  = ID_FALSE;
+        FALSE_identifier.top_var = "0";
+
+
+        Unique_table_entry FALSE_entry;
+        FALSE_entry.id =ID_FALSE;
+        FALSE_entry.label = "0";
+        FALSE_entry.identifier = FALSE_identifier;
+        FALSE_entry.is_variable = false;
+
+        //unique_table[ID_FALSE] = FALSE_entry;  //add new variable entry to the table
+
+        auto false_entrie_pair = std::make_pair(ID_FALSE, FALSE_entry);
+        unique_table.insert (false_entrie_pair);    
     }
-
-
-
-
 
 
     BDD_ID ManagerImplementation::ite(const BDD_ID i, const BDD_ID t, const BDD_ID e){
@@ -60,29 +101,7 @@ namespace ClassProject {
         if((i == 0 || i == 1) && (t == 0 || t == 1)){   //case "else" is unknown and i and t are bool.
             if (!i) return e;
             return t;
-            //if(t== 0) return ID_FALSE;
-            //if(t== 1) return ID_TRUE;
         }
-
-
-        //all terminal cases are checked!!!!
-
-        //check cases that simplify e.g. ite(f,1,0) = f or ite(ID0, ID1, ID3) = ID3
-
-
-
-
-
-
-
-        /*
-        if(terminal_case){  //check if the input returns a boolean value
-            //return a boolean value
-        }else if(check if triple(i,t,e) has already_entry in table){
-            //access the unique table and return result.
-        }
-        */
-
 
 
         //now check if triplet(top_variable, id_high=t, id_low=e) already exists in table
@@ -125,7 +144,7 @@ namespace ClassProject {
         h = check_if_unique_identifier_in_table(identifier);
 
         if (h.first){
-            //std::cout << "case was detected of already exisiting identifier" << std::endl;
+            //identifier already exists in table, thus just return the already existing ID
             return h.second;
         }
 
@@ -173,7 +192,7 @@ namespace ClassProject {
         if (recursion_high == recursion_low) return recursion_high;
 
 
-        //add result to unique_table: 
+        //add result to unique_table, if its not already in table
         identifier.top_var = top_var_priority;
         identifier.id_high = recursion_high;
         identifier.id_low = recursion_low;
@@ -182,26 +201,20 @@ namespace ClassProject {
         h = check_if_unique_identifier_in_table(identifier);
 
         if (h.first){
-            //std::cout << "case was detected of already exisiting identifier" << std::endl;
+            //identifier already exists in table, thus just return the already existing ID
             return h.second;    //return the ID that corresponds to this entry
         }
 
-
-
-        BDD_ID result_id;
-        result_id = add_table_entry(identifier, "label");//improve label
-        //std::cout << " result_id  "  << result_id << " (identifier_top,recusion_high, recusion_low)  " << top_var_priority << " " << recursion_high <<  "  " << recursion_low << std::endl;
-
-        return result_id;
+        return add_table_entry(identifier, "label"); //improve label
     }
 
 
     const BDD_ID&  ManagerImplementation::True(){
-        return id_node_true;
+        return ID_TRUE;
     }
 
     const BDD_ID&  ManagerImplementation::False(){
-        return id_node_false;
+        return ID_FALSE;
     }
 
     bool ManagerImplementation::isConstant(const BDD_ID f){
@@ -254,58 +267,6 @@ namespace ClassProject {
         return variable_to_id_map[top_variable];
     }
 
-    void ManagerImplementation::init(){
-
-        //here initialize data-structure
-        latest_id_value = LATEST_VALUE_INIT;
-        BDD_ID id_node_true  = ID_TRUE;   //ID of node representing TRUE always 1
-        BDD_ID id_node_false = ID_FALSE;   //ID of node representing TRUE always 0
-
-
-        
-        //add entry for TRUE into unique table
-        Unique_identifier TRUE_identifier;
-        TRUE_identifier.id_high = ID_TRUE;
-        TRUE_identifier.id_low  = ID_TRUE;
-        TRUE_identifier.top_var = "1";
-
-
-        Unique_table_entry TRUE_entry;
-        TRUE_entry.id =ID_TRUE;
-        TRUE_entry.label = "1";
-        TRUE_entry.identifier = TRUE_identifier;
-        TRUE_entry.is_variable = false;
-
-
-        auto true_entrie_pair = std::make_pair(ID_TRUE, TRUE_entry);
-        unique_table.insert (true_entrie_pair);
-        
-
-        //unique_table[ID_TRUE] = TRUE_entry;  //add new variable entry to the table
-
-
-        //add entry for FALSE into unique table
-        Unique_identifier FALSE_identifier;
-        FALSE_identifier.id_high = ID_FALSE;
-        FALSE_identifier.id_low  = ID_FALSE;
-        FALSE_identifier.top_var = "0";
-
-
-        Unique_table_entry FALSE_entry;
-        FALSE_entry.id =ID_FALSE;
-        FALSE_entry.label = "0";
-        FALSE_entry.identifier = FALSE_identifier;
-        FALSE_entry.is_variable = false;
-
-        //unique_table[ID_FALSE] = FALSE_entry;  //add new variable entry to the table
-
-        auto false_entrie_pair = std::make_pair(ID_FALSE, FALSE_entry);
-        unique_table.insert (false_entrie_pair);
-
-    }
-
-
-
 
     BDD_ID ManagerImplementation::and2(const BDD_ID a, const BDD_ID b){
         return ite(a, b, ID_FALSE);
@@ -330,7 +291,6 @@ namespace ClassProject {
     }
 
     BDD_ID ManagerImplementation::nand2(const BDD_ID a, const BDD_ID b){
-        //nand(a,b) = not(and(a,b))
         return neg(and2(a,b));
     }
 
@@ -362,9 +322,10 @@ namespace ClassProject {
         //traverse through tree, when you encounter a node with ID(top_var)= x then replace node in parent with id_high
         //check if root_node is dependent on var x
         Unique_table_entry root = get_table_entry(f);
-        std::string var_name = root.identifier.top_var;
+        std::string var_name_root = root.identifier.top_var;
 
-        if (variable_to_id_map[var_name] == x)  {
+        //weird case if we want to cofactor of the variable of the root, but root.id_low=root.id_high
+        if (variable_to_id_map[var_name_root] == x)  {
             if (cofactor_case) {
                 return root.identifier.id_high;
             }else {
@@ -420,6 +381,8 @@ namespace ClassProject {
         }
         return f;
         }
+
+
 
     void ManagerImplementation::findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root){    //returns the set of BDD nodes whih are reachable from the BDD node root(including itself)
         //traverse through "tree" starting at root.

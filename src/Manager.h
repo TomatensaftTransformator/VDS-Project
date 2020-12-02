@@ -86,10 +86,9 @@ namespace ClassProject {
             bool is_variable;   //is true if the entry of this ID is a variable; false if not.
     };
 
-    class ManagerImplementation {
+    class ManagerImplementation : public ManagerInterface {
     public:
         ManagerImplementation();    //Constructor
-        void init(); //initialize ManagerImplementation
 
         BDD_ID ite(const BDD_ID i, const BDD_ID t, const BDD_ID e);
 
@@ -140,8 +139,6 @@ namespace ClassProject {
     private:
         BDD_ID latest_id_value;
         std::unordered_map<BDD_ID, Unique_table_entry> unique_table;
-        BDD_ID id_node_true  = ID_TRUE;   //ID of node representing TRUE always 1
-        BDD_ID id_node_false = ID_FALSE;   //ID of node representing TRUE always 0
 
         std::map<std::string, BDD_ID> variable_to_id_map;
         std::map<std::string, int> variable_to_order_map;   //start with a simple : variable first added has highest order
