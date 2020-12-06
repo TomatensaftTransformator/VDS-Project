@@ -75,7 +75,6 @@ namespace ClassProject {
 
     BDD_ID ManagerImplementation::ite(const BDD_ID i, const BDD_ID t, const BDD_ID e){
         //ite(i,t,e) = i*t + not(i)*e
-        bool terminal_case = false;
         //case i) all 3 values are boolean then just evaluate i*t + not(i)*e
         if((i == 0 || i == 1) && (t == 0 || t == 1) && (e == 0 || e == 1)){
             bool i_b = (bool)i;
@@ -86,6 +85,8 @@ namespace ClassProject {
             ite_evaluation = i&&t || (!i)&&e;
             return (BDD_ID)ite_evaluation;
         }
+
+        if (t==e) return t;
 
         if((t == 0 || t == 1) && (e == 0 || e == 1)){   //case "if" is unknown and t and e are bool.
             if(t == 0 && e== 0) return ID_FALSE;
@@ -130,10 +131,6 @@ namespace ClassProject {
         }
         
 
-        //std::cout << "top_var_priority  " << top_var_priority << std::endl;
-
-
-
         //access top_variable through table
         Unique_identifier identifier;
         identifier.top_var = top_var_priority;
@@ -175,19 +172,12 @@ namespace ClassProject {
             e_low = e;
         }
 
-        //std::cout << "high_input:  " << i_high << "  "<< t_high << "  "  << e_high << std::endl;
-        //std::cout << "low_input:  " << i_low << "  "<< t_low << "  "  << e_low << std::endl;
-
-
+  
 
         BDD_ID recursion_high, recursion_low;
 
-        //recursion for high
         recursion_high = ite(i_high, t_high, e_high);
-        //std::cout << "recursion_high  " << recursion_high << std::endl;
-        //recursion for low
         recursion_low = ite(i_low, t_low, e_low);
-        //std::cout << "recursion_low  " << recursion_low << std::endl;
 
         if (recursion_high == recursion_low) return recursion_high;
 
@@ -218,7 +208,7 @@ namespace ClassProject {
     }
 
     bool ManagerImplementation::isConstant(const BDD_ID f){
-        if(f == 0 || f == 1) return true;
+        if(f == ID_FALSE || f == ID_TRUE) return true;
         return false;
     }
 
@@ -263,7 +253,6 @@ namespace ClassProject {
     //not tested yet!
     BDD_ID ManagerImplementation::topVar(const BDD_ID f){      //returns the ID of the top_variable of the node f
         std::string top_variable = get_table_entry(f).identifier.top_var;
-        //std::cout << top_variable << std::endl;
         return variable_to_id_map[top_variable];
     }
 
@@ -299,14 +288,15 @@ namespace ClassProject {
     }
 
 
-
     BDD_ID ManagerImplementation::coFactorFalse(const BDD_ID f, BDD_ID x){
         return coFactorCase(f,x,false);
     }
 
+    
       BDD_ID ManagerImplementation::coFactorTrue(const BDD_ID f, BDD_ID x){
         return coFactorCase(f,x,true);
     }
+    
 
     BDD_ID ManagerImplementation::coFactorTrue(const BDD_ID f){
         Unique_table_entry node = get_table_entry(f);
@@ -318,70 +308,45 @@ namespace ClassProject {
         return node.identifier.id_low;
     }
 
-    BDD_ID ManagerImplementation::coFactorCase(const BDD_ID f, BDD_ID x, bool cofactor_case){
-        //traverse through tree, when you encounter a node with ID(top_var)= x then replace node in parent with id_high
-        //check if root_node is dependent on var x
-        Unique_table_entry root = get_table_entry(f);
-        std::string var_name_root = root.identifier.top_var;
+ 
+      BDD_ID ManagerImplementation::coFactorCase(const BDD_ID f, BDD_ID x, bool cofactor_case){
+        // cofactorcase == TRUE : coFactorTrue ; cofactorcase == FALSE : coFactorFalse
+        //f is input function we use for our recursion
+        //x is the id of the variable we want to do our cofactoring
 
-        //weird case if we want to cofactor of the variable of the root, but root.id_low=root.id_high
-        if (variable_to_id_map[var_name_root] == x)  {
-            if (cofactor_case) {
-                return root.identifier.id_high;
-            }else {
-                return root.identifier.id_low;
-            }
+        //get id of the top_variable
+        Unique_identifier identifier = get_table_entry(f).identifier; 
+        BDD_ID id_high = identifier.id_high;
+        BDD_ID id_low = identifier.id_low;
+
+        if(topVar(f) == x ) {
+            if (cofactor_case) return id_high;
+            return id_low;
         }
 
-        std::set<BDD_ID> reachable_nodes;
-        findNodes(f, reachable_nodes);
-        BDD_ID replace_with_id;
-        BDD_ID replaced_id;
-        bool found_node_with_var = false;
+        if(isConstant(f)) return f; //f is leaf node thus stop recursion
+        
+        
+        
+        BDD_ID recursion_high = coFactorCase(id_high, x, cofactor_case);
+        BDD_ID recursion_low  = coFactorCase(id_low, x, cofactor_case);
 
-        for (auto node_id : reachable_nodes) {
-            Unique_table_entry node = get_table_entry(node_id);
-            std::string var_name = node.identifier.top_var;
-            if (variable_to_id_map[var_name] == x) {
-                if (cofactor_case) {
-                    replace_with_id = node.identifier.id_high;        
+        if (recursion_high == recursion_low) return recursion_high;
 
-                }else {
-                    replace_with_id = node.identifier.id_low;        
-                }
-                replaced_id = node_id;
-                found_node_with_var = true;
-                //std::cout << "replaced_id,replace_with_id   "  << replaced_id  << "   "  <<  replace_with_id << std::endl;
-            }
+        //add result to unique_table, if its not already in table
+        identifier.id_high = recursion_high;
+        identifier.id_low = recursion_low;
+
+        //check for duplicates before adding
+        auto h = check_if_unique_identifier_in_table(identifier);
+
+        if (h.first){
+            //identifier already exists in table, thus just return the already existing ID
+            return h.second;    //return the ID that corresponds to this entry
         }
 
-
-        if (!found_node_with_var){
-            //std::cout << "Exit through not found" << std::endl;
-            //std::cout << f << std::endl;
-            return f; //function is independent of variable x
-        }
-
-
-        for (auto node_id : reachable_nodes) {
-            Unique_table_entry node = get_table_entry(node_id);
-            if (node.identifier.id_high == replaced_id){
-                node.identifier.id_high = replace_with_id;
-                unique_table[node_id] = node;   //update node
-            }
-            if (node.identifier.id_low == replaced_id){
-                node.identifier.id_low = replace_with_id;
-                unique_table[node_id] = node;   //update node
-            }
-        }
-        //now we have to check if there are nodes with id_high=id_low and thus can be replaced/removed.
-        root = get_table_entry(f);
-        if(root.identifier.id_high == root.identifier.id_low) {
-            return root.identifier.id_high;
-        }
-        return f;
-        }
-
+        return add_table_entry(identifier, "label"); //improve label
+    }
 
 
     void ManagerImplementation::findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root){    //returns the set of BDD nodes whih are reachable from the BDD node root(including itself)
@@ -400,8 +365,6 @@ namespace ClassProject {
         Unique_table_entry node = get_table_entry(root);
         return node.identifier.top_var;
     }
-
-
 
 
 
@@ -456,5 +419,3 @@ namespace ClassProject {
     }
 
 }
-//begin with the parsing of the input function.
-//input function has format : f = and(or(a,b),and(c,d)) then construct an Abstract-Syntax-Tree from it

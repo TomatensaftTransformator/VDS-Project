@@ -518,6 +518,197 @@ TEST(ManagerTest, UniqueTableExampleTest) {
 }
 
 
+TEST(ManagerTest, UniqueTable2Test) {
+    ClassProject::ManagerImplementation manager;
+
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_d = manager.createVar("d");
+    
+    ClassProject::BDD_ID id_or_result = manager.or2(id_a, id_b);
+    ClassProject::BDD_ID id_and_result = manager.and2(id_c, id_d);
+    ClassProject::BDD_ID final_result = manager.and2(id_or_result, id_and_result);
+    //now we have the table as in the example pdf file
+
+    ClassProject::BDD_ID id_and_result_2 = manager.and2(id_c, id_d);
+
+    ClassProject::Unique_identifier identifier_result;
+    identifier_result.id_high = id_d;
+    identifier_result.id_low  = ClassProject::ID_FALSE;
+    identifier_result.top_var = "c";
+
+    Unique_identifier_EQ(manager.get_table_entry(id_and_result_2).identifier, identifier_result);
+    EXPECT_EQ(id_and_result_2, id_and_result);
+
+
+    size_t size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID final_result_2 = manager.and2(final_result, id_and_result_2);//should not change the table
+    EXPECT_EQ(final_result, final_result_2);
+    EXPECT_EQ(size_before, manager.uniqueTableSize());
+
+    size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID final_result_3 = manager.and2(final_result, final_result);//should not change the table
+    EXPECT_EQ(final_result, final_result_3);
+    EXPECT_EQ(size_before, manager.uniqueTableSize());
+
+
+    size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID final_result_4 = manager.or2(final_result, final_result);//should not change the table
+    EXPECT_EQ(final_result, final_result_4);
+    EXPECT_EQ(size_before, manager.uniqueTableSize());
+}
+
+
+
+
+
+TEST(ManagerTest, UniqueTable3Test) {
+    ClassProject::ManagerImplementation manager;
+
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_d = manager.createVar("d");
+    
+    ClassProject::BDD_ID id_or_result = manager.or2(id_a, id_b);
+    ClassProject::BDD_ID id_and_result = manager.and2(id_c, id_d);
+    ClassProject::BDD_ID final_result = manager.and2(id_or_result, id_and_result);
+
+
+    ClassProject::BDD_ID id_e = manager.createVar("e");
+
+    size_t size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID final_result_2 = manager.or2(final_result, id_e);
+    EXPECT_EQ(size_before + 4, manager.uniqueTableSize());  //should create 4 new nodes
+
+
+
+    ClassProject::Unique_identifier identifier_result;
+    identifier_result.id_high = ClassProject::ID_TRUE;
+    identifier_result.id_low  = id_e;
+    identifier_result.top_var = "d";
+
+    Unique_identifier_EQ(manager.get_table_entry(size_before).identifier, identifier_result);
+
+
+    identifier_result.id_high = size_before;
+    identifier_result.id_low  = id_e;
+    identifier_result.top_var = "c";
+
+    Unique_identifier_EQ(manager.get_table_entry(size_before +1).identifier, identifier_result);
+
+    
+    identifier_result.id_high = size_before + 1;
+    identifier_result.id_low  = id_e;
+    identifier_result.top_var = "b";
+
+    Unique_identifier_EQ(manager.get_table_entry(size_before +2).identifier, identifier_result);
+
+
+    identifier_result.id_high = size_before + 1;
+    identifier_result.id_low  = size_before + 2;
+    identifier_result.top_var = "a";
+
+    Unique_identifier_EQ(manager.get_table_entry(final_result_2).identifier, identifier_result);
+
+
+
+
+    ClassProject::BDD_ID id_f = manager.createVar("f");
+
+    size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID final_result_3 = manager.and2(final_result_2, id_f);
+    EXPECT_EQ(size_before + 5, manager.uniqueTableSize());
+
+
+
+    identifier_result.id_high = id_f;
+    identifier_result.id_low  = ClassProject::ID_FALSE;
+    identifier_result.top_var = "e";
+    ClassProject::BDD_ID new_e_node = size_before;
+
+    Unique_identifier_EQ(manager.get_table_entry(new_e_node).identifier, identifier_result);
+
+
+    identifier_result.id_high = id_f;
+    identifier_result.id_low  = new_e_node;
+    identifier_result.top_var = "d";
+    ClassProject::BDD_ID new_d_node = size_before +1;
+
+
+    Unique_identifier_EQ(manager.get_table_entry(new_d_node).identifier, identifier_result);
+
+    
+    identifier_result.id_high = new_d_node;
+    identifier_result.id_low  = new_e_node;
+    identifier_result.top_var = "c";
+    ClassProject::BDD_ID new_c_node = size_before +2;
+
+
+    Unique_identifier_EQ(manager.get_table_entry(new_c_node).identifier, identifier_result);
+
+
+
+    identifier_result.id_high = new_c_node;
+    identifier_result.id_low  = size_before;
+    identifier_result.top_var = "b";
+    ClassProject::BDD_ID new_b_node = size_before +3;
+
+
+    Unique_identifier_EQ(manager.get_table_entry(new_b_node).identifier, identifier_result);
+
+
+
+    identifier_result.id_high = new_c_node;
+    identifier_result.id_low  = new_b_node;
+    identifier_result.top_var = "a";
+    ClassProject::BDD_ID new_a_node = final_result_3;
+
+
+    Unique_identifier_EQ(manager.get_table_entry(final_result_3).identifier, identifier_result);
+
+
+
+    size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID final_result_4 = manager.or2(final_result_3, id_c);
+    //EXPECT_EQ(size_before + 5, manager.uniqueTableSize());
+
+
+    identifier_result.id_high = ClassProject::ID_TRUE;
+    identifier_result.id_low  = new_e_node;
+    identifier_result.top_var = "c";
+    ClassProject::BDD_ID new_c_node_2 = size_before;
+
+
+
+    Unique_identifier_EQ(manager.get_table_entry(new_c_node_2).identifier, identifier_result);
+
+    Unique_identifier_EQ(manager.get_table_entry(final_result_4).identifier, identifier_result);
+
+
+
+
+    //check if old result stays untouched of our new computations
+    identifier_result.id_high = new_c_node;
+    identifier_result.id_low  = new_b_node;
+    identifier_result.top_var = "a";
+
+    Unique_identifier_EQ(manager.get_table_entry(final_result_3).identifier, identifier_result);
+
+
+
+
+}
+
+
+
+
+
+
+
 
 TEST(ManagerTest, findNodesTest) {
     ClassProject::ManagerImplementation manager;
@@ -601,35 +792,175 @@ TEST(ManagerTest, CoFactorTrueTest) {
     ClassProject::BDD_ID id_c = manager.createVar("c");
     ClassProject::BDD_ID id_d = manager.createVar("d");
     
-    ClassProject::BDD_ID id_or_result = manager.or2(id_a, id_b);
+    ClassProject::BDD_ID id_or_result = manager.and2(id_a, id_b);
     ClassProject::BDD_ID id_and_result =manager.and2(id_c, id_d);
-    manager.and2(id_or_result, id_and_result);
+    ClassProject::BDD_ID result = manager.and2(id_or_result, id_and_result);
     //manager.and2(manager.or2(id_a, id_b), manager.and2(id_c, id_d));
 
-    ClassProject::BDD_ID result_id = manager.coFactorTrue(9, id_a);
-    EXPECT_EQ(result_id, 7);
 
+    size_t size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID result_id = manager.coFactorTrue(result, id_b);
+    EXPECT_EQ(size_before + 1, manager.uniqueTableSize());
 
-    ClassProject::BDD_ID result_id2 = manager.coFactorFalse(7, id_c);
-    EXPECT_EQ(result_id2, 0);
-
-    ClassProject::BDD_ID result_id3 = manager.coFactorTrue(9, id_b);
     ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = 5;
-    identifier_result.id_low  = 0;
-    identifier_result.top_var = "c";
+    identifier_result.id_high = id_and_result;
+    identifier_result.id_low  = ClassProject::ID_FALSE;
+    identifier_result.top_var = "a";
 
-    Unique_identifier_EQ(manager.get_table_entry(result_id3).identifier, identifier_result);
 
-    ClassProject::BDD_ID result_id4 = manager.coFactorTrue(9, 100); //should do nothing
-    ClassProject::Unique_identifier identifier_result2;
-    identifier_result2.id_high = 5;
-    identifier_result2.id_low  = 0;
-    identifier_result2.top_var = "c";
+    
+    Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
 
-    //here we can reduce the BDD again!!!!
+}
 
-    //Unique_identifier_EQ(manager.get_table_entry(result_id4).identifier, identifier_result2);
+
+
+TEST(ManagerTest, CoFactorTrue2Test) {
+    ClassProject::ManagerImplementation manager;
+
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_d = manager.createVar("d");
+    
+    ClassProject::BDD_ID id_or_result = manager.or2(id_a, id_b);
+    ClassProject::BDD_ID id_and_result =manager.and2(id_c, id_d);
+    ClassProject::BDD_ID result =manager.and2(id_or_result, id_and_result);
+
+
+
+
+    size_t size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID result_id = manager.coFactorTrue(result, id_c);
+    EXPECT_EQ(size_before + 2, manager.uniqueTableSize());
+
+
+    ClassProject::Unique_identifier identifier_result;
+    identifier_result.id_high = id_d;
+    identifier_result.id_low  = ClassProject::ID_FALSE;
+    identifier_result.top_var = "b";
+    ClassProject::BDD_ID new_b = size_before;
+
+
+    Unique_identifier_EQ(manager.get_table_entry(new_b).identifier, identifier_result);
+
+
+    identifier_result.id_high = id_d;
+    identifier_result.id_low  = new_b;
+    identifier_result.top_var = "a";
+
+    Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
+
+
+    ClassProject::BDD_ID result_id_2 = manager.coFactorTrue(result_id, id_d);
+    ClassProject::BDD_ID result_id_3 = manager.coFactorTrue(result_id_2, id_a);
+    ClassProject::BDD_ID result_id_4 = manager.coFactorTrue(result_id_3, id_b);
+
+
+    identifier_result.id_high = ClassProject::ID_TRUE;
+    identifier_result.id_low  = ClassProject::ID_TRUE;
+    identifier_result.top_var = "1";
+
+    Unique_identifier_EQ(manager.get_table_entry(result_id_4).identifier, identifier_result);
+
+
+}
+
+
+
+
+TEST(ManagerTest, CoFactorFalseTest) {
+    ClassProject::ManagerImplementation manager;
+
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_d = manager.createVar("d");
+    
+    ClassProject::BDD_ID id_or_result = manager.and2(id_a, id_b);
+    ClassProject::BDD_ID id_and_result =manager.and2(id_c, id_d);
+    ClassProject::BDD_ID result = manager.and2(id_or_result, id_and_result);
+    //manager.and2(manager.or2(id_a, id_b), manager.and2(id_c, id_d));
+
+
+    size_t size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID result_id = manager.coFactorFalse(result, id_b);
+    //EXPECT_EQ(size_before + 1, manager.uniqueTableSize());
+
+    ClassProject::Unique_identifier identifier_result;
+    identifier_result.id_high = ClassProject::ID_FALSE;
+    identifier_result.id_low  = ClassProject::ID_FALSE;
+    identifier_result.top_var = "0";
+
+
+    
+    Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
+
+}
+
+
+
+TEST(ManagerTest, CoFactorFalse2Test) {
+    ClassProject::ManagerImplementation manager;
+
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_d = manager.createVar("d");
+    
+    ClassProject::BDD_ID id_or_result = manager.or2(id_a, id_b);
+    ClassProject::BDD_ID id_and_result =manager.and2(id_c, id_d);
+    ClassProject::BDD_ID result =manager.and2(id_or_result, id_and_result);
+
+
+
+
+    ClassProject::BDD_ID result_id = manager.coFactorFalse(result, id_c);
+
+
+    ClassProject::Unique_identifier identifier_result;
+    identifier_result.id_high = ClassProject::ID_FALSE;
+    identifier_result.id_low  = ClassProject::ID_FALSE;
+    identifier_result.top_var = "0";
+
+
+    Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
+
+
+
+    size_t size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID result_id_2 = manager.coFactorFalse(result, id_b);
+    EXPECT_EQ(size_before + 1, manager.uniqueTableSize());
+
+
+    identifier_result;
+    identifier_result.id_high = id_and_result;
+    identifier_result.id_low  = ClassProject::ID_FALSE;
+    identifier_result.top_var = "a";
+
+
+    Unique_identifier_EQ(manager.get_table_entry(result_id_2).identifier, identifier_result);
+
+
+
+
+
+    size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID result_id_3 = manager.coFactorFalse(result, id_a);
+    EXPECT_EQ(size_before, manager.uniqueTableSize());
+
+
+    identifier_result;
+    identifier_result.id_high = id_and_result;
+    identifier_result.id_low  = ClassProject::ID_FALSE;
+    identifier_result.top_var = "b";
+
+
+    Unique_identifier_EQ(manager.get_table_entry(result_id_3).identifier, identifier_result);
+
 }
 
 
