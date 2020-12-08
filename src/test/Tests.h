@@ -36,6 +36,11 @@ struct ManagerTest: testing::Test {
 };
 
 
+TEST(InitializeTest, dummy_test) {
+    EXPECT_EQ(1, 2);
+}
+
+
 
 TEST(InitializeTest, unique_table_size) {
     ClassProject::ManagerImplementation manager;
