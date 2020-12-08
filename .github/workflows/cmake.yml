@@ -1,0 +1,13 @@
+
+on: push
+
+job:
+  script:
+    - sudo apt-get update
+    - sudo apt-get install -y git cmake g++
+    - git submodule update --init --recursive
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j
+    - ./src/test/VDSProject_test
