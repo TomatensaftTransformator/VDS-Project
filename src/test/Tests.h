@@ -10,23 +10,6 @@
 
 
 
-//define a custom function to compare 2 Unique_identifier
-void Unique_identifier_EQ(ClassProject::Unique_identifier id1, ClassProject::Unique_identifier id2){
-    EXPECT_EQ(id1.top_var, id2.top_var);
-    EXPECT_EQ(id1.id_low,  id2.id_low);
-    EXPECT_EQ(id1.id_high, id2.id_high);
-}
-
-
-//define a custom function to compare 2 Unique_table_entry
-void Unique_table_entry_EQ(ClassProject::Unique_table_entry entry1, ClassProject::Unique_table_entry entry2){
-    Unique_identifier_EQ(entry1.identifier, entry2.identifier);
-    EXPECT_EQ(entry1.id,  entry2.id);
-    EXPECT_EQ(entry1.label, entry2.label);
-    EXPECT_EQ(entry1.is_variable, entry2.is_variable);
-}
-
-
 struct ManagerTest: testing::Test {
     ManagerTest(){
         manager = ClassProject::ManagerImplementation ();
@@ -82,6 +65,35 @@ TEST(ManagerTest, uniqueTableSizeTest) {
 
     EXPECT_EQ(manager.uniqueTableSize(), s);
 }
+
+
+
+TEST(ManagerTest, isConstantTest) {
+    ClassProject::ManagerImplementation manager;
+
+    size_t s = manager.uniqueTableSize();
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_d = manager.createVar("d");
+    ClassProject::BDD_ID id_e = manager.createVar("e");
+
+    EXPECT_EQ(manager.isConstant(manager.True()), true);
+    EXPECT_EQ(manager.isConstant(manager.False()), true);
+
+
+
+    EXPECT_EQ(manager.isConstant(id_b), false);
+    EXPECT_EQ(manager.isConstant(id_e), false);
+
+
+
+    EXPECT_EQ(manager.isConstant(manager.and2(id_a, id_e)), false);
+    EXPECT_EQ(manager.isConstant(manager.nand2(id_b, id_c)), false);
+}
+
+
+
 
 
 
@@ -503,7 +515,6 @@ TEST(ManagerTest, UniqueTableExampleTest) {
     ClassProject::BDD_ID id_or_result = manager.or2(id_a, id_b);
     ClassProject::BDD_ID id_and_result =manager.and2(id_c, id_d);
     ClassProject::BDD_ID id_result = manager.and2(id_or_result, id_and_result);
-    //manager.and2(manager.or2(id_a, id_b), manager.and2(id_c, id_d));
 
     EXPECT_EQ(manager.uniqueTableSize(), 10);
     size_t size_before = manager.uniqueTableSize();
@@ -511,20 +522,22 @@ TEST(ManagerTest, UniqueTableExampleTest) {
     EXPECT_EQ(manager.uniqueTableSize(), size_before + 4);
 
 
+
+    //root node of same function as in bdd_example.pdf
     EXPECT_EQ(manager.getTopVarName(id_result), "a");
     EXPECT_EQ(manager.topVar(id_result), id_a);
-    //EXPECT_EQ(manager.coFactorTrue(id_result), manager.True());
-    //EXPECT_EQ(manager.coFactorFalse(id_result), manager.False());
+    EXPECT_EQ(manager.coFactorTrue(id_result), id_and_result);
+    EXPECT_EQ(manager.coFactorFalse(id_result),id_result - 1);
     EXPECT_EQ(manager.isVariable(id_result), false);
 
 
 
-
-    EXPECT_EQ(manager.getTopVarName(id_d), "d");
-    EXPECT_EQ(manager.topVar(id_d), id_d);
-    EXPECT_EQ(manager.coFactorTrue(id_d), manager.True());
-    EXPECT_EQ(manager.coFactorFalse(id_d), manager.False());
-    EXPECT_EQ(manager.isVariable(id_d), true);
+    //node with id=8 in bdd_example.pdf
+    EXPECT_EQ(manager.getTopVarName(id_result -1), "b");
+    EXPECT_EQ(manager.topVar(id_result - 1), id_b);
+    EXPECT_EQ(manager.coFactorTrue(id_result - 1), id_and_result);
+    EXPECT_EQ(manager.coFactorFalse(id_result - 1), manager.False());
+    EXPECT_EQ(manager.isVariable(id_result - 1), false);
     }
 
 
@@ -782,7 +795,7 @@ TEST(ManagerTest, UniqueTable4Test) {
     ClassProject::BDD_ID id_and_acdf = manager.and2(manager.and2(manager.and2(id_a, id_c), id_d), id_f);
     ClassProject::BDD_ID id_and_bcd =  manager.and2(manager.and2(id_b, id_c), id_d);
     ClassProject::BDD_ID final_result = manager.or2(id_and_acdf, id_and_bcd);
-    //now we have the table as in the example pdf file
+
     EXPECT_EQ(manager.getTopVarName(final_result), "a");
     EXPECT_EQ(manager.topVar(final_result), id_a);
     EXPECT_EQ(manager.coFactorTrue(final_result), 16);
@@ -1132,6 +1145,51 @@ TEST(ManagerTest, CoFactorFalse2Test) {
 }
 
 
+TEST(ManagerTest, CoFactorAndVariableTest) {
+    ClassProject::ManagerImplementation manager;
+
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_d = manager.createVar("d");
+    ClassProject::BDD_ID id_e = manager.createVar("e");
+    ClassProject::BDD_ID id_f = manager.createVar("f");
+
+    ClassProject::BDD_ID id_and_acdf = manager.and2(manager.and2(manager.and2(id_a, id_c), id_d), id_f);
+    ClassProject::BDD_ID id_and_bcd =  manager.and2(manager.and2(id_b, id_c), id_d);
+    ClassProject::BDD_ID final_result = manager.or2(id_and_acdf, id_and_bcd);
+
+
+    std::set<ClassProject::BDD_ID> compare_result_set;
+    compare_result_set.insert(id_a);
+    compare_result_set.insert(id_c);
+    compare_result_set.insert(id_d);
+    compare_result_set.insert(id_b);
+    compare_result_set.insert(id_f);
+
+    std::set<ClassProject::BDD_ID> result_set;
+    manager.findVars(final_result, result_set);
+    EXPECT_EQ(result_set, compare_result_set);
+
+
+
+
+
+    //test to check if function is no longer dependent on "c" after we used coFactorTrue(function, c)
+    ClassProject::BDD_ID final_result2 = manager.coFactorTrue(final_result, id_c);
+    std::set<ClassProject::BDD_ID> compare_result_set2;
+    compare_result_set.insert(id_a);
+    compare_result_set.insert(id_d);
+    compare_result_set.insert(id_b);
+    compare_result_set.insert(id_f);
+
+    std::set<ClassProject::BDD_ID> result_set2;
+    manager.findVars(final_result2, result_set);
+    EXPECT_EQ(result_set, compare_result_set);
+
+
+}
 
 
 
@@ -1143,6 +1201,15 @@ TEST(ManagerTest, DuplicateEntryTest) {
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_b2 = manager.createVar("b");
+    ClassProject::BDD_ID id_one = manager.createVar("1");
+    ClassProject::BDD_ID id_zero = manager.createVar("0");
+
+
+
+    EXPECT_EQ(manager.False(), id_zero);
+    EXPECT_EQ(manager.True(), id_one);
+    EXPECT_EQ(id_b, id_b2);
 
     manager.and2(id_a, id_b);
     size_t s = manager.uniqueTableSize();

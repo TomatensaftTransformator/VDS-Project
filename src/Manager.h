@@ -93,12 +93,14 @@ namespace ClassProject {
 
         bool isVariable(const BDD_ID x);   //returns true if x is a variable
         bool isConstant(const BDD_ID f);    //returns true if f is a leaf-node
+
+
+
+
         BDD_ID topVar(const BDD_ID f);      //returns the ID of the top_variable of the node f
-
         BDD_ID createVar(const std::string &label);     //creates new variable for the BDD
-
-
         std::string getTopVarName(const BDD_ID &root);  //returns asghar the name of the top-variable of the node root
+
 
         void findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root);    //returns the set of BDD nodes whih are reachable from the BDD node root(including itself)
         void findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root);
