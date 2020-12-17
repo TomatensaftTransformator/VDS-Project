@@ -27,9 +27,6 @@ namespace ClassProject {
     ManagerImplementation::ManagerImplementation(){
         //here initialize data-structure
         latest_id_value = LATEST_VALUE_INIT;
-        BDD_ID id_node_true  = ID_TRUE;   //ID of node representing TRUE always 1
-        BDD_ID id_node_false = ID_FALSE;   //ID of node representing TRUE always 0
-
 
         
         //add entry for TRUE into unique table
@@ -48,7 +45,8 @@ namespace ClassProject {
 
         auto true_entrie_pair = std::make_pair(ID_TRUE, TRUE_entry);
         unique_table.insert (true_entrie_pair);
-        
+        variable_to_id_map["1"] = ID_TRUE;
+
 
         //unique_table[ID_TRUE] = TRUE_entry;  //add new variable entry to the table
 
@@ -70,6 +68,9 @@ namespace ClassProject {
 
         auto false_entrie_pair = std::make_pair(ID_FALSE, FALSE_entry);
         unique_table.insert (false_entrie_pair);    
+        variable_to_id_map["0"] = ID_FALSE;
+
+    
     }
 
 
@@ -86,22 +87,13 @@ namespace ClassProject {
             return (BDD_ID)ite_evaluation;
         }
 
+        if(i == 1) return t;
+        if(i == 0) return e;
+
         if (t==e) return t;
 
         if((t == 0 || t == 1) && (e == 0 || e == 1)){   //case "if" is unknown and t and e are bool.
-            if(t == 0 && e== 0) return ID_FALSE;
-            if(t == 1 && e== 1) return ID_TRUE;
             if(t == 1 && e== 0) return i;
-        }
-
-        if((i == 0 || i == 1) && (e == 0 || e == 1)){   //case "then" is unknown and i and e are bool.
-            if (i) return t;
-            return e;// e is either 0 or 1
-        }
-
-        if((i == 0 || i == 1) && (t == 0 || t == 1)){   //case "else" is unknown and i and t are bool.
-            if (!i) return e;
-            return t;
         }
 
 
@@ -112,19 +104,19 @@ namespace ClassProject {
         std::string top_var_priority;
 
         if (!(i == 0 || i == 1)){
-            std::string top_var_i = get_top_var(i);
+            std::string top_var_i = unique_table.at(i).identifier.top_var;
             top_var_priority = top_var_i;
         }
         
         if (!(t == 0 || t == 1)) {
-            std::string top_var_t = get_top_var(t);
+            std::string top_var_t = unique_table.at(t).identifier.top_var;
             if(variable_to_order_map[top_var_t] < variable_to_order_map[top_var_priority]){
                 top_var_priority = top_var_t;
             }
         }
 
         if (!(e == 0 || e == 1)){
-            std::string top_var_e = get_top_var(e);
+            std::string top_var_e = unique_table.at(e).identifier.top_var;
             if(variable_to_order_map[top_var_e] < variable_to_order_map[top_var_priority]){
                 top_var_priority = top_var_e;
             }
@@ -148,25 +140,25 @@ namespace ClassProject {
 
         BDD_ID i_high, i_low, t_high, t_low, e_high, e_low;
 
-        if (get_top_var(i) == top_var_priority){
-            i_high = get_table_entry(i).identifier.id_high;
-            i_low = get_table_entry(i).identifier.id_low;
+        if (unique_table.at(i).identifier.top_var == top_var_priority){
+            i_high = unique_table.at(i).identifier.id_high;
+            i_low = unique_table.at(i).identifier.id_low;
         } else{
             i_high = i;
             i_low =  i;
         }
 
-        if (get_top_var(t) == top_var_priority){
-            t_high = get_table_entry(t).identifier.id_high;
-            t_low = get_table_entry(t).identifier.id_low;
+        if (unique_table.at(t).identifier.top_var == top_var_priority){
+            t_high = unique_table.at(t).identifier.id_high;
+            t_low = unique_table.at(t).identifier.id_low;
         } else{
             t_high = t;
             t_low = t;
         }
 
-        if (get_top_var(e) == top_var_priority){
-            e_high = get_table_entry(e).identifier.id_high;
-            e_low = get_table_entry(e).identifier.id_low;
+        if (unique_table.at(e).identifier.top_var == top_var_priority){
+            e_high = unique_table.at(e).identifier.id_high;
+            e_low = unique_table.at(e).identifier.id_low;
         } else{
             e_high = e;
             e_low = e;
@@ -250,10 +242,8 @@ namespace ClassProject {
         return latest_id_value;
     }
 
-    //not tested yet!
     BDD_ID ManagerImplementation::topVar(const BDD_ID f){      //returns the ID of the top_variable of the node f
-        std::string top_variable = get_table_entry(f).identifier.top_var;
-        return variable_to_id_map[top_variable];
+        return variable_to_id_map[unique_table.at(f).identifier.top_var];
     }
 
 
@@ -299,13 +289,11 @@ namespace ClassProject {
     
 
     BDD_ID ManagerImplementation::coFactorTrue(const BDD_ID f){
-        Unique_table_entry node = get_table_entry(f);
-        return node.identifier.id_high;
+        return unique_table.at(f).identifier.id_high;
     }
 
     BDD_ID ManagerImplementation::coFactorFalse(const BDD_ID f){
-        Unique_table_entry node = get_table_entry(f);
-        return node.identifier.id_low;
+        return unique_table.at(f).identifier.id_low;
     }
 
  
@@ -315,7 +303,7 @@ namespace ClassProject {
         //x is the id of the variable we want to do our cofactoring
 
         //get id of the top_variable
-        Unique_identifier identifier = get_table_entry(f).identifier; 
+        Unique_identifier identifier = unique_table.at(f).identifier; 
         BDD_ID id_high = identifier.id_high;
         BDD_ID id_low = identifier.id_low;
 
@@ -354,7 +342,7 @@ namespace ClassProject {
         //go down until
         nodes_of_root.insert(root);
         if (root == ID_FALSE || root == ID_TRUE) return;
-        Unique_table_entry node = get_table_entry(root);
+        Unique_table_entry node = unique_table.at(root);
 
         findNodes(node.identifier.id_low, nodes_of_root);
         findNodes(node.identifier.id_high, nodes_of_root);
@@ -362,8 +350,7 @@ namespace ClassProject {
 
 
     std::string ManagerImplementation::getTopVarName(const BDD_ID &root){
-        Unique_table_entry node = get_table_entry(root);
-        return node.identifier.top_var;
+        return unique_table.at(root).identifier.top_var;
     }
 
 
@@ -374,7 +361,7 @@ namespace ClassProject {
         std::string var_name = getTopVarName(root);
         BDD_ID var_id = variable_to_id_map[var_name];
         vars_of_root.insert(var_id);
-        Unique_table_entry node = get_table_entry(root);
+        Unique_table_entry node = unique_table.at(root);
 
         findVars(node.identifier.id_low, vars_of_root);
         findVars(node.identifier.id_high, vars_of_root);
@@ -382,7 +369,8 @@ namespace ClassProject {
 
 
 
-
+    //function violates encapsulation of the private object
+    //but is heavily used in the tests ... :(
     Unique_table_entry ManagerImplementation::get_table_entry(BDD_ID x){
         return unique_table.at(x);
     }
@@ -409,13 +397,6 @@ namespace ClassProject {
         for (std::pair<BDD_ID, Unique_table_entry> table_entry : unique_table){
             if (table_entry.second.identifier == x) return std::make_pair(true, table_entry.first);
         }
-        return std::make_pair(false,-1);    //BDD_ID not of interes in this case
+        return std::make_pair(false,-1);    //BDD_ID not of interest in this case
     }
-
-
-
-    std::string ManagerImplementation::get_top_var(BDD_ID x){
-        return unique_table.at(x).identifier.top_var;
-    }
-
 }

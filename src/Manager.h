@@ -56,7 +56,7 @@ namespace ClassProject {
 
     class Unique_identifier {
         public:
-            Unique_identifier();        //identifier
+            Unique_identifier();        //constructor
 
             std::string top_var;
             BDD_ID id_low;
@@ -80,9 +80,6 @@ namespace ClassProject {
             Unique_identifier identifier;
             BDD_ID id;
             std::string label;
-            //BDD_ID id_high;
-            //BDD_ID id_low;
-            //std::string top_var;
             bool is_variable;   //is true if the entry of this ID is a variable; false if not.
     };
 
@@ -130,11 +127,6 @@ namespace ClassProject {
 
         size_t uniqueTableSize();   //returns the number of nodes currently exist in the table of the manager
 
-        Unique_table_entry get_table_entry(BDD_ID x);
-        BDD_ID add_table_entry(Unique_identifier identifier, std::string label);
-        std::pair<bool, BDD_ID> check_if_unique_identifier_in_table(Unique_identifier x);
-        std::string get_top_var(BDD_ID x);
-
 
     private:
         BDD_ID latest_id_value;
@@ -142,6 +134,11 @@ namespace ClassProject {
 
         std::map<std::string, BDD_ID> variable_to_id_map;
         std::map<std::string, int> variable_to_order_map;   //start with a simple : variable first added has highest order
+    
+        BDD_ID add_table_entry(Unique_identifier identifier, std::string label);
+        std::pair<bool, BDD_ID> check_if_unique_identifier_in_table(Unique_identifier x);
+        Unique_table_entry get_table_entry(BDD_ID x);
+
     };
 }
 

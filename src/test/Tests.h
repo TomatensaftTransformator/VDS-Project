@@ -39,7 +39,6 @@ struct ManagerTest: testing::Test {
 
 TEST(InitializeTest, unique_table_size) {
     ClassProject::ManagerImplementation manager;
-    //manager.init();
     EXPECT_EQ(manager.uniqueTableSize(), 2);
 }
 
@@ -47,21 +46,11 @@ TEST(InitializeTest, true_entry) {
     ClassProject::ManagerImplementation manager;
 
 
-    ClassProject::Unique_identifier TRUE_identifier;
-    TRUE_identifier.id_high = ClassProject::ID_TRUE;
-    TRUE_identifier.id_low  = ClassProject::ID_TRUE;
-    TRUE_identifier.top_var = "1";
-
-
-    ClassProject::Unique_table_entry TRUE_entry;
-    TRUE_entry.id = ClassProject::ID_TRUE;
-    TRUE_entry.label = "1";
-    TRUE_entry.identifier = TRUE_identifier;
-    TRUE_entry.is_variable = false;
-
-
-
-    Unique_table_entry_EQ(manager.get_table_entry(ClassProject::ID_TRUE), TRUE_entry);
+    EXPECT_EQ(manager.True(), 1);
+    EXPECT_EQ(manager.topVar(manager.True()), 1);
+    EXPECT_EQ(manager.coFactorTrue(manager.True()), 1);
+    EXPECT_EQ(manager.coFactorFalse(manager.True()), 1);
+    EXPECT_EQ(manager.getTopVarName(manager.True()), "1");
 }
 
 
@@ -69,21 +58,11 @@ TEST(InitializeTest, false_entry) {
     ClassProject::ManagerImplementation manager;
 
 
-    ClassProject::Unique_identifier FALSE_identifier;
-    FALSE_identifier.id_high = ClassProject::ID_FALSE;
-    FALSE_identifier.id_low  = ClassProject::ID_FALSE;
-    FALSE_identifier.top_var = "0";
-
-
-    ClassProject::Unique_table_entry FALSE_entry;
-    FALSE_entry.id = ClassProject::ID_FALSE;
-    FALSE_entry.label = "0";
-    FALSE_entry.identifier = FALSE_identifier;
-    FALSE_entry.is_variable = false;
-
-
-
-    Unique_table_entry_EQ(manager.get_table_entry(ClassProject::ID_FALSE), FALSE_entry);
+    EXPECT_EQ(manager.False(), 0);
+    EXPECT_EQ(manager.topVar(manager.False()), 0);
+    EXPECT_EQ(manager.coFactorTrue(manager.False()), 0);
+    EXPECT_EQ(manager.coFactorFalse(manager.False()), 0);
+    EXPECT_EQ(manager.getTopVarName(manager.False()), "0");
 }
 
 
@@ -137,11 +116,36 @@ TEST(ManagerTest, topVarTest) {
     EXPECT_EQ(manager.topVar(id_or), id_b);
 
 
-   ClassProject::BDD_ID id_and2 = manager.and2(id_or, id_and);
+    ClassProject::BDD_ID id_and2 = manager.and2(id_or, id_and);
     EXPECT_EQ(manager.topVar(id_and2), id_a);
+
+
+
+    EXPECT_EQ(manager.topVar(manager.True()), manager.True());
+
+
 }
 
+TEST(ManagerTest, getTopVarNameTest){
+    ClassProject::ManagerImplementation manager;
 
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+
+    EXPECT_EQ("a", manager.getTopVarName(id_a));
+
+    EXPECT_EQ("b", manager.getTopVarName(id_b));
+
+
+    EXPECT_EQ("1", manager.getTopVarName(manager.True()));
+    EXPECT_EQ("0", manager.getTopVarName(manager.False()));
+
+
+    ClassProject::BDD_ID res = manager.and2(id_a, id_b);
+    EXPECT_EQ("a", manager.getTopVarName(res));
+
+}
 
 TEST(ManagerTest, iteTermincalCasesTest) {
     ClassProject::ManagerImplementation manager;
@@ -180,6 +184,33 @@ TEST(ManagerTest, iteTermincalCasesTest) {
     EXPECT_EQ(manager.ite(1,5,1), 5);
 }
 
+
+
+
+TEST(ManagerTest, iteTermincal2CasesTest) {
+    ClassProject::ManagerImplementation manager;
+
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+
+    ClassProject::BDD_ID res1 = manager.ite(1, id_a, id_b);
+    ClassProject::BDD_ID res2 = manager.ite(0, id_a, id_b);
+
+
+    EXPECT_EQ(id_a, res1);
+    EXPECT_EQ(id_b, res2);
+
+}
+
+
+
+
+
+
+
+
+
 TEST(ManagerTest, createVarTest) {
     ClassProject::ManagerImplementation manager;
 
@@ -200,49 +231,50 @@ TEST(ManagerTest, createVarTest) {
     entry_a.is_variable = true;
 
 
-    Unique_table_entry_EQ(manager.get_table_entry(id_a), entry_a);
+
+    EXPECT_EQ(manager.getTopVarName(id_a), "a");
+    EXPECT_EQ(manager.topVar(id_a), id_a);
+    EXPECT_EQ(manager.coFactorTrue(id_a), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(id_a), manager.False());
+    EXPECT_EQ(manager.isVariable(id_a), true);
+
 
 
     ClassProject::BDD_ID id_b = manager.createVar("b");
 
-
-    ClassProject::Unique_identifier identifier_b;
-    identifier_b.id_high = ClassProject::ID_TRUE;
-    identifier_b.id_low  = ClassProject::ID_FALSE;
-    identifier_b.top_var = "b";
-
-    ClassProject::Unique_table_entry entry_b;
-    entry_b.id = 3;
-    entry_b.label = "b";
-    entry_b.identifier = identifier_b;
-    entry_b.is_variable = true;
+    EXPECT_EQ(manager.getTopVarName(id_b), "b");
+    EXPECT_EQ(manager.topVar(id_b), id_b);
+    EXPECT_EQ(manager.coFactorTrue(id_b), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(id_b), manager.False());
+    EXPECT_EQ(manager.isVariable(id_b), true);
 
 
 
-    Unique_table_entry_EQ(manager.get_table_entry(id_b), entry_b);
+    ClassProject::BDD_ID id_b_duplicate1 = manager.createVar(manager.getTopVarName(id_b));
+    EXPECT_EQ(id_b_duplicate1, id_b);
 
 
     //variable names should be unique; thus in a cases of adding same variable twice just return the first id
+    size_t size_before = manager.uniqueTableSize();
     ClassProject::BDD_ID id_b_duplicate = manager.createVar("b");
-    Unique_table_entry_EQ(manager.get_table_entry(id_b_duplicate), entry_b);
+    EXPECT_EQ(manager.getTopVarName(id_b_duplicate), "b");
+    EXPECT_EQ(manager.topVar(id_b), id_b_duplicate);
+    EXPECT_EQ(manager.coFactorTrue(id_b_duplicate), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(id_b_duplicate), manager.False());
+    EXPECT_EQ(manager.isVariable(id_b_duplicate), true);
 
+
+
+    EXPECT_EQ(manager.uniqueTableSize(), size_before);
+    EXPECT_EQ(id_b, id_b_duplicate);
 
     ClassProject::BDD_ID id_empty_string = manager.createVar("");
 
-
-    ClassProject::Unique_identifier identifier_empty;
-    identifier_empty.id_high = ClassProject::ID_TRUE;
-    identifier_empty.id_low  = ClassProject::ID_FALSE;
-    identifier_empty.top_var = "";
-
-    ClassProject::Unique_table_entry entry_empty_string;
-    entry_empty_string.id = 4;
-    entry_empty_string.label = "";
-    entry_empty_string.identifier = identifier_empty;
-    entry_empty_string.is_variable = true;
-
-
-    Unique_table_entry_EQ(manager.get_table_entry(id_empty_string), entry_empty_string);
+    EXPECT_EQ(manager.getTopVarName(id_empty_string), "");
+    EXPECT_EQ(manager.topVar(id_empty_string), id_empty_string);
+    EXPECT_EQ(manager.coFactorTrue(id_empty_string), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(id_empty_string), manager.False());
+    EXPECT_EQ(manager.isVariable(id_empty_string), true);
 }
 
 
@@ -260,44 +292,27 @@ TEST(ManagerTest, OrTest) {
     //or(a,b) = ite(a, 1, b)
     ClassProject::BDD_ID result_id = manager.or2(id_a, id_b);
 
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = ClassProject::ID_TRUE;
-    identifier_result.id_low  = id_b;
-    identifier_result.top_var = "a";
 
-    Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
+    EXPECT_EQ(manager.getTopVarName(result_id), "a");
+    EXPECT_EQ(manager.topVar(result_id), id_a);
+    EXPECT_EQ(manager.coFactorTrue(result_id), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(result_id), id_b);
+    EXPECT_EQ(manager.isVariable(result_id), false);
 
 
-    //and(a,b) = ite(b, a, 0)
+
+
+
     ClassProject::BDD_ID result_id2 = manager.or2(id_b, id_a);
-
     EXPECT_EQ(result_id, result_id2);
-
-    identifier_result.id_high = ClassProject::ID_TRUE;
-    identifier_result.id_low  = id_b;
-    identifier_result.top_var = "a";
-
-    Unique_identifier_EQ(manager.get_table_entry(result_id2).identifier, identifier_result);
 
 
     ClassProject::BDD_ID result_id3 = manager.or2(id_b, 1);    //or(b,1) = 1
-
-    identifier_result.id_high = ClassProject::ID_TRUE;
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "1";
-
-    Unique_identifier_EQ(manager.get_table_entry(result_id3).identifier, identifier_result);
-
+    EXPECT_EQ(result_id3, manager.True());
 
 
     ClassProject::BDD_ID result_id4 = manager.or2(id_b, 0);    //or(b,0) = b
-
-    identifier_result.id_high = ClassProject::ID_TRUE;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "b";
-    //(a,3,0)
-
-    Unique_identifier_EQ(manager.get_table_entry(result_id4).identifier, identifier_result);
+    EXPECT_EQ(result_id4, id_b);
 }
 
 
@@ -311,33 +326,22 @@ TEST(ManagerTest, AndTest) {
 
 
     ClassProject::BDD_ID result_id = manager.and2(id_a, id_b);
+    EXPECT_EQ(manager.getTopVarName(result_id), "a");
+    EXPECT_EQ(manager.topVar(result_id), id_a);
+    EXPECT_EQ(manager.coFactorTrue(result_id), id_b);
+    EXPECT_EQ(manager.coFactorFalse(result_id), manager.False());
+    EXPECT_EQ(manager.isVariable(result_id), false);
 
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = id_b;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "a";
-
-    Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
 
 
     ClassProject::BDD_ID result_id2 = manager.and2(id_b, id_a);
-
     EXPECT_EQ(result_id, result_id2);
 
-    identifier_result.id_high = id_b;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "a";
 
-    Unique_identifier_EQ(manager.get_table_entry(result_id2).identifier, identifier_result);
 
 
     ClassProject::BDD_ID result_id3 = manager.and2(id_b, 1);    //and(b,1) = b
-
-    identifier_result.id_high = ClassProject::ID_TRUE;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "b";
-
-    Unique_identifier_EQ(manager.get_table_entry(result_id3).identifier, identifier_result);
+    EXPECT_EQ(result_id3, id_b);
 }
 
 
@@ -348,36 +352,31 @@ TEST(ManagerTest, NegationTest) {
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
 
-    //and(a,b) = ite(a, b, 0)
-    ClassProject::BDD_ID id_result =  manager.neg(id_a); //neg(a)
-    ClassProject::Unique_table_entry result_entry = manager.get_table_entry(id_result);
-
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "a";
-
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
-
-    id_result = manager.neg(id_b);
-    result_entry = manager.get_table_entry(id_result);
-
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "b";
-
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
 
 
-    id_result = manager.neg(0);
-    result_entry = manager.get_table_entry(id_result);
+    ClassProject::BDD_ID result_id =  manager.neg(id_a); //neg(a)
+    EXPECT_EQ(manager.getTopVarName(result_id), "a");
+    EXPECT_EQ(manager.topVar(result_id), id_a);
+    EXPECT_EQ(manager.coFactorTrue(result_id), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(result_id), manager.True());
+    EXPECT_EQ(manager.isVariable(result_id), false);
 
-    identifier_result.id_high = ClassProject::ID_TRUE;
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "1";
 
 
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
+    result_id = manager.neg(id_b);
+    EXPECT_EQ(manager.getTopVarName(result_id), "b");
+    EXPECT_EQ(manager.topVar(result_id), id_b);
+    EXPECT_EQ(manager.coFactorTrue(result_id), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(result_id), manager.True());
+    EXPECT_EQ(manager.isVariable(result_id), false);
+
+
+    result_id = manager.neg(0);
+    EXPECT_EQ(result_id, manager.True());
+
+
+    result_id = manager.neg(1);
+    EXPECT_EQ(result_id, manager.False());
 }
 
 
@@ -391,54 +390,36 @@ TEST(ManagerTest, NandTest) {
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
 
+    ClassProject::BDD_ID not_b = manager.neg(id_b);
     ClassProject::BDD_ID id_result = manager.nand2(id_a,id_b); //nand(a,b) = not(a) + not(b)
     //should create through recursion a entry for not b and for and(a,b).
     EXPECT_EQ(manager.uniqueTableSize(), 7);
 
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = 5;  //id of not(b)
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "a";
 
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
+    EXPECT_EQ(manager.getTopVarName(id_result), "a");
+    EXPECT_EQ(manager.topVar(id_result), id_a);
+    EXPECT_EQ(manager.coFactorTrue(id_result), not_b);
+    EXPECT_EQ(manager.coFactorFalse(id_result), manager.True());
+    EXPECT_EQ(manager.isVariable(id_result), false);
 
 
 
     id_result = manager.nand2(id_a, 0); //nand(a,0) = not(a) + not(0) = 1
-
-    identifier_result.id_high = ClassProject::ID_TRUE;
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "1";
-
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
-
+    EXPECT_EQ(id_result, manager.True());
 
 
 
     id_result = manager.nand2(1, id_b); //nand(1,b) = not(1) + not(b) = not(b)
-
-    //not(b)
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "b";
-
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
-
-
+    EXPECT_EQ(manager.getTopVarName(id_result), "b");
+    EXPECT_EQ(manager.topVar(id_result), id_b);
+    EXPECT_EQ(manager.coFactorTrue(id_result), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(id_result), manager.True());
+    EXPECT_EQ(manager.isVariable(id_result), false);
 
 
 
     id_result = manager.nand2(1, 1); //nand(1,1) = not(1) + not(1) = 0
-
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "0";
-
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
-
-
-
-
+    EXPECT_EQ(id_result, manager.False());
 }
 
 
@@ -450,43 +431,26 @@ TEST(ManagerTest, NorTest) {
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
 
-
+    ClassProject::BDD_ID id_not_b = manager.neg(id_b);
     ClassProject::BDD_ID id_result = manager.nor2(id_a,id_b); //nor(a,b) = not(or(a,b))
     EXPECT_EQ(manager.uniqueTableSize(), 7);
 
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = 5;      //id of not(b)
-    identifier_result.top_var = "a";
 
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
+    EXPECT_EQ(manager.getTopVarName(id_result), "a");
+    EXPECT_EQ(manager.topVar(id_result), id_a);
+    EXPECT_EQ(manager.coFactorTrue(id_result), manager.False());
+    EXPECT_EQ(manager.coFactorFalse(id_result), id_not_b);
+    EXPECT_EQ(manager.isVariable(id_result), false);
 
 
+
+    ClassProject::BDD_ID id_not_a = manager.neg(id_a);
     id_result = manager.nor2(id_a,0); //nor(a,0) = not(a + 0) = not(a)
-
-    //not(a)
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "a";
-
-
-
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
-
+    EXPECT_EQ(id_result, id_not_a);
 
 
     id_result = manager.nor2(id_a, 1); //nor(a,1) = not(a + 1) = not(1) = 0
-
-    //0
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "0";
-
-
-
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
-
-
+    EXPECT_EQ(id_result, manager.False());
 }
 
 
@@ -497,39 +461,33 @@ TEST(ManagerTest, XorTest) {
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
 
+    ClassProject::BDD_ID id_not_b = manager.neg(id_b); //xor(a,b) = a*not(b) + not(a)*b
     ClassProject::BDD_ID id_result = manager.xor2(id_a,id_b); //xor(a,b) = a*not(b) + not(a)*b
     //should create through recursion a entry for not(b) and for not(a)).
     //should create a entry for a*not(b) ; not(b)*a
     EXPECT_EQ(manager.uniqueTableSize(), 9); //this size is 2 leafs + 2 vars + 2 nots + 2 ands + final result = 10
 
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = 5;      //id of not(b)
-    identifier_result.id_low  = 3;      //id of b
-    identifier_result.top_var = "a";
+
+    EXPECT_EQ(manager.getTopVarName(id_result), "a");
+    EXPECT_EQ(manager.topVar(id_result), id_a);
+    EXPECT_EQ(manager.coFactorTrue(id_result), id_not_b);
+    EXPECT_EQ(manager.coFactorFalse(id_result), id_b);
+    EXPECT_EQ(manager.isVariable(id_result), false);
 
 
-    Unique_identifier_EQ(manager.get_table_entry(id_result).identifier, identifier_result);
 
     size_t size_before = manager.uniqueTableSize();
     id_result = manager.xor2(id_b, id_a); //should not change the table
     EXPECT_EQ(manager.uniqueTableSize(), size_before);
 
 
-    ClassProject::BDD_ID id_result2 = manager.xor2(id_a,0); //xor(a,0) = a*1 + not(a)*0
-
+    ClassProject::BDD_ID id_result2 = manager.xor2(id_a,0); //xor(a,0) = a*1 + not(a)*0 = a
     EXPECT_EQ(id_result2, id_a);
 
 
     size_before = manager.uniqueTableSize();
-    ClassProject::BDD_ID id_result3 = manager.xor2(1, id_b); //xor(1,b) = 1*not b + 0*b
-    //not(b)
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "b";
-
-    Unique_identifier_EQ(manager.get_table_entry(id_result3).identifier, identifier_result);
-    EXPECT_EQ(manager.uniqueTableSize(), size_before);
-
+    ClassProject::BDD_ID id_result3 = manager.xor2(1, id_b); //xor(1,b) = 1*not b + 0*b = notb
+    EXPECT_EQ(id_result3, id_not_b);
 }
 
 
@@ -544,24 +502,30 @@ TEST(ManagerTest, UniqueTableExampleTest) {
     
     ClassProject::BDD_ID id_or_result = manager.or2(id_a, id_b);
     ClassProject::BDD_ID id_and_result =manager.and2(id_c, id_d);
-    ClassProject::BDD_ID result = manager.and2(id_or_result, id_and_result);
+    ClassProject::BDD_ID id_result = manager.and2(id_or_result, id_and_result);
     //manager.and2(manager.or2(id_a, id_b), manager.and2(id_c, id_d));
 
     EXPECT_EQ(manager.uniqueTableSize(), 10);
     size_t size_before = manager.uniqueTableSize();
-    result = manager.neg(result);
+    ClassProject::BDD_ID neg_result = manager.neg(id_result);
     EXPECT_EQ(manager.uniqueTableSize(), size_before + 4);
 
 
+    EXPECT_EQ(manager.getTopVarName(id_result), "a");
+    EXPECT_EQ(manager.topVar(id_result), id_a);
+    //EXPECT_EQ(manager.coFactorTrue(id_result), manager.True());
+    //EXPECT_EQ(manager.coFactorFalse(id_result), manager.False());
+    EXPECT_EQ(manager.isVariable(id_result), false);
 
-    
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "d";
 
-    Unique_identifier_EQ(manager.get_table_entry(10).identifier, identifier_result);
-}
+
+
+    EXPECT_EQ(manager.getTopVarName(id_d), "d");
+    EXPECT_EQ(manager.topVar(id_d), id_d);
+    EXPECT_EQ(manager.coFactorTrue(id_d), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(id_d), manager.False());
+    EXPECT_EQ(manager.isVariable(id_d), true);
+    }
 
 
 TEST(ManagerTest, UniqueTable2Test) {
@@ -578,15 +542,23 @@ TEST(ManagerTest, UniqueTable2Test) {
     ClassProject::BDD_ID final_result = manager.and2(id_or_result, id_and_result);
     //now we have the table as in the example pdf file
 
+    EXPECT_EQ(manager.getTopVarName(id_and_result), "c");
+    EXPECT_EQ(manager.topVar(id_and_result), id_c);
+    EXPECT_EQ(manager.coFactorTrue(id_and_result), id_d);
+    EXPECT_EQ(manager.coFactorFalse(id_and_result), manager.False());
+    EXPECT_EQ(manager.isVariable(id_and_result), false);
+
+
+
+
+
+
+
+
+
     ClassProject::BDD_ID id_and_result_2 = manager.and2(id_c, id_d);
-
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = id_d;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "c";
-
-    Unique_identifier_EQ(manager.get_table_entry(id_and_result_2).identifier, identifier_result);
     EXPECT_EQ(id_and_result_2, id_and_result);
+
 
 
     size_t size_before = manager.uniqueTableSize();
@@ -631,35 +603,51 @@ TEST(ManagerTest, UniqueTable3Test) {
     EXPECT_EQ(size_before + 4, manager.uniqueTableSize());  //should create 4 new nodes
 
 
-
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = ClassProject::ID_TRUE;
-    identifier_result.id_low  = id_e;
-    identifier_result.top_var = "d";
-
-    Unique_identifier_EQ(manager.get_table_entry(size_before).identifier, identifier_result);
+    EXPECT_EQ(manager.getTopVarName(size_before), "d");
+    EXPECT_EQ(manager.topVar(size_before), id_d);
+    EXPECT_EQ(manager.coFactorTrue(size_before), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(size_before), id_e);
+    EXPECT_EQ(manager.isVariable(size_before), false);
 
 
-    identifier_result.id_high = size_before;
-    identifier_result.id_low  = id_e;
-    identifier_result.top_var = "c";
-
-    Unique_identifier_EQ(manager.get_table_entry(size_before +1).identifier, identifier_result);
-
-    
-    identifier_result.id_high = size_before + 1;
-    identifier_result.id_low  = id_e;
-    identifier_result.top_var = "b";
-
-    Unique_identifier_EQ(manager.get_table_entry(size_before +2).identifier, identifier_result);
 
 
-    identifier_result.id_high = size_before + 1;
-    identifier_result.id_low  = size_before + 2;
-    identifier_result.top_var = "a";
 
-    Unique_identifier_EQ(manager.get_table_entry(final_result_2).identifier, identifier_result);
 
+
+
+    EXPECT_EQ(manager.getTopVarName(size_before  +1), "c");
+    EXPECT_EQ(manager.topVar(size_before + 1), id_c);
+    EXPECT_EQ(manager.coFactorTrue(size_before + 1), size_before);
+    EXPECT_EQ(manager.coFactorFalse(size_before + 1), id_e);
+    EXPECT_EQ(manager.isVariable(size_before + 1) , false);
+
+
+
+
+
+
+
+    EXPECT_EQ(manager.getTopVarName(size_before + 2), "b");
+    EXPECT_EQ(manager.topVar(size_before + 2), id_b);
+    EXPECT_EQ(manager.coFactorTrue(size_before + 2), size_before + 1);
+    EXPECT_EQ(manager.coFactorFalse(size_before + 2), id_e);
+    EXPECT_EQ(manager.isVariable(size_before + 2) , false);
+
+
+
+
+
+
+
+
+
+
+    EXPECT_EQ(manager.getTopVarName(final_result_2), "a");
+    EXPECT_EQ(manager.topVar(final_result_2), id_a);
+    EXPECT_EQ(manager.coFactorTrue(final_result_2), size_before + 1);
+    EXPECT_EQ(manager.coFactorFalse(final_result_2), size_before + 2);
+    EXPECT_EQ(manager.isVariable(final_result_2) , false);
 
 
 
@@ -671,50 +659,96 @@ TEST(ManagerTest, UniqueTable3Test) {
 
 
 
-    identifier_result.id_high = id_f;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "e";
     ClassProject::BDD_ID new_e_node = size_before;
 
-    Unique_identifier_EQ(manager.get_table_entry(new_e_node).identifier, identifier_result);
 
 
-    identifier_result.id_high = id_f;
-    identifier_result.id_low  = new_e_node;
-    identifier_result.top_var = "d";
+
+    EXPECT_EQ(manager.getTopVarName(new_e_node), "e");
+    EXPECT_EQ(manager.topVar(new_e_node), id_e);
+    EXPECT_EQ(manager.coFactorTrue(new_e_node), id_f);
+    EXPECT_EQ(manager.coFactorFalse(new_e_node), manager.False());
+    EXPECT_EQ(manager.isVariable(new_e_node) , false);
+
+
+
+
+
     ClassProject::BDD_ID new_d_node = size_before +1;
 
 
-    Unique_identifier_EQ(manager.get_table_entry(new_d_node).identifier, identifier_result);
 
-    
-    identifier_result.id_high = new_d_node;
-    identifier_result.id_low  = new_e_node;
-    identifier_result.top_var = "c";
+
+
+    EXPECT_EQ(manager.getTopVarName(new_d_node), "d");
+    EXPECT_EQ(manager.topVar(new_d_node), id_d);
+    EXPECT_EQ(manager.coFactorTrue(new_d_node), id_f);
+    EXPECT_EQ(manager.coFactorFalse(new_d_node), new_e_node);
+    EXPECT_EQ(manager.isVariable(new_d_node) , false);
+
+
+
+
+
     ClassProject::BDD_ID new_c_node = size_before +2;
 
 
-    Unique_identifier_EQ(manager.get_table_entry(new_c_node).identifier, identifier_result);
 
 
 
-    identifier_result.id_high = new_c_node;
-    identifier_result.id_low  = size_before;
-    identifier_result.top_var = "b";
+
+    EXPECT_EQ(manager.getTopVarName(new_c_node), "c");
+    EXPECT_EQ(manager.topVar(new_c_node), id_c);
+    EXPECT_EQ(manager.coFactorTrue(new_c_node), new_d_node);
+    EXPECT_EQ(manager.coFactorFalse(new_c_node), new_e_node);
+    EXPECT_EQ(manager.isVariable(new_c_node) , false);
+
+
+
+
+
+
+
+
+
     ClassProject::BDD_ID new_b_node = size_before +3;
 
 
-    Unique_identifier_EQ(manager.get_table_entry(new_b_node).identifier, identifier_result);
 
 
 
-    identifier_result.id_high = new_c_node;
-    identifier_result.id_low  = new_b_node;
-    identifier_result.top_var = "a";
+    EXPECT_EQ(manager.getTopVarName(new_b_node), "b");
+    EXPECT_EQ(manager.topVar(new_b_node), id_b);
+    EXPECT_EQ(manager.coFactorTrue(new_b_node), new_c_node);
+    EXPECT_EQ(manager.coFactorFalse(new_b_node), new_e_node);
+    EXPECT_EQ(manager.isVariable(new_b_node) , false);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     ClassProject::BDD_ID new_a_node = final_result_3;
 
 
-    Unique_identifier_EQ(manager.get_table_entry(final_result_3).identifier, identifier_result);
+    EXPECT_EQ(manager.getTopVarName(final_result_3), "a");
+    EXPECT_EQ(manager.topVar(final_result_3), id_a);
+    EXPECT_EQ(manager.coFactorTrue(final_result_3), new_c_node);
+    EXPECT_EQ(manager.coFactorFalse(final_result_3), new_b_node);
+    EXPECT_EQ(manager.isVariable(final_result_3) , false);
+
+
+
+
 
 
 
@@ -723,32 +757,94 @@ TEST(ManagerTest, UniqueTable3Test) {
     //EXPECT_EQ(size_before + 5, manager.uniqueTableSize());
 
 
-    identifier_result.id_high = ClassProject::ID_TRUE;
-    identifier_result.id_low  = new_e_node;
-    identifier_result.top_var = "c";
-    ClassProject::BDD_ID new_c_node_2 = size_before;
+
+
+    EXPECT_EQ(manager.getTopVarName(final_result_4), "c");
+    EXPECT_EQ(manager.topVar(final_result_4), id_c);
+    EXPECT_EQ(manager.coFactorTrue(final_result_4), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(final_result_4), new_e_node);
+    EXPECT_EQ(manager.isVariable(final_result_4) , false);
+}
 
 
 
-    Unique_identifier_EQ(manager.get_table_entry(new_c_node_2).identifier, identifier_result);
-
-    Unique_identifier_EQ(manager.get_table_entry(final_result_4).identifier, identifier_result);
-
+TEST(ManagerTest, UniqueTable4Test) {
+    ClassProject::ManagerImplementation manager;
 
 
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_d = manager.createVar("d");
+    ClassProject::BDD_ID id_e = manager.createVar("e");
+    ClassProject::BDD_ID id_f = manager.createVar("f");
 
-    //check if old result stays untouched of our new computations
-    identifier_result.id_high = new_c_node;
-    identifier_result.id_low  = new_b_node;
-    identifier_result.top_var = "a";
+    ClassProject::BDD_ID id_and_acdf = manager.and2(manager.and2(manager.and2(id_a, id_c), id_d), id_f);
+    ClassProject::BDD_ID id_and_bcd =  manager.and2(manager.and2(id_b, id_c), id_d);
+    ClassProject::BDD_ID final_result = manager.or2(id_and_acdf, id_and_bcd);
+    //now we have the table as in the example pdf file
+    EXPECT_EQ(manager.getTopVarName(final_result), "a");
+    EXPECT_EQ(manager.topVar(final_result), id_a);
+    EXPECT_EQ(manager.coFactorTrue(final_result), 16);
+    EXPECT_EQ(manager.coFactorFalse(final_result), 15);
+    EXPECT_EQ(manager.isVariable(final_result) , false);
 
-    Unique_identifier_EQ(manager.get_table_entry(final_result_3).identifier, identifier_result);
+
+    EXPECT_EQ(manager.getTopVarName(16), "b");
+    EXPECT_EQ(manager.topVar(16), id_b);
+    EXPECT_EQ(manager.coFactorTrue(16), 9);
+    EXPECT_EQ(manager.coFactorFalse(16), 12);
+    EXPECT_EQ(manager.isVariable(16) , false);
+
+
+    EXPECT_EQ(manager.getTopVarName(15), "b");
+    EXPECT_EQ(manager.topVar(15), id_b);
+    EXPECT_EQ(manager.coFactorTrue(15), 9);
+    EXPECT_EQ(manager.coFactorFalse(15), 0);
+    EXPECT_EQ(manager.isVariable(15) , false);
+
+
+    EXPECT_EQ(manager.getTopVarName(9), "c");
+    EXPECT_EQ(manager.topVar(9), id_c);
+    EXPECT_EQ(manager.coFactorTrue(9), 5);
+    EXPECT_EQ(manager.coFactorFalse(9), 0);
+    EXPECT_EQ(manager.isVariable(9) , false);
+
+
+    EXPECT_EQ(manager.getTopVarName(5), "d");
+    EXPECT_EQ(manager.topVar(5), id_d);
+    EXPECT_EQ(manager.coFactorTrue(5), 1);
+    EXPECT_EQ(manager.coFactorFalse(5), 0);
+    EXPECT_EQ(manager.isVariable(5) , true);
+
+
+
+    EXPECT_EQ(manager.getTopVarName(12), "c");
+    EXPECT_EQ(manager.topVar(12), id_c);
+    EXPECT_EQ(manager.coFactorTrue(12), 11);
+    EXPECT_EQ(manager.coFactorFalse(12), 0);
+    EXPECT_EQ(manager.isVariable(12) , false);
+
+
+
+    EXPECT_EQ(manager.getTopVarName(11), "d");
+    EXPECT_EQ(manager.topVar(11), id_d);
+    EXPECT_EQ(manager.coFactorTrue(11), 7);
+    EXPECT_EQ(manager.coFactorFalse(11), 0);
+    EXPECT_EQ(manager.isVariable(11) , false);
+
+
+
+    EXPECT_EQ(manager.getTopVarName(7), "f");
+    EXPECT_EQ(manager.topVar(7), id_f);
+    EXPECT_EQ(manager.coFactorTrue(7), 1);
+    EXPECT_EQ(manager.coFactorFalse(7), 0);
+    EXPECT_EQ(manager.isVariable(7) , true);
 
 
 
 
 }
-
 
 
 
@@ -834,6 +930,46 @@ TEST(ManagerTest, findVarsTest) {
 
 
 
+TEST(ManagerTest, findVars2Test) {
+    ClassProject::ManagerImplementation manager;
+
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_d = manager.createVar("d");
+    
+    ClassProject::BDD_ID id_or_result =  manager.or2(id_a, id_b);
+    ClassProject::BDD_ID id_and_result = manager.and2(id_c, id_d);
+    ClassProject::BDD_ID id_result = manager.and2(id_or_result, id_and_result);
+    //manager.and2(manager.or2(id_a, id_b), manager.and2(id_c, id_d));
+    id_result = manager.coFactorFalse(id_result, id_b);
+    std::set<ClassProject::BDD_ID> vars_of_root;
+    manager.findVars(id_result, vars_of_root);
+
+    std::set<ClassProject::BDD_ID> compare_result_set;
+    compare_result_set.insert(id_a);
+    compare_result_set.insert(id_c);
+    compare_result_set.insert(id_d);
+
+    EXPECT_EQ(vars_of_root, compare_result_set);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 TEST(ManagerTest, CoFactorTrueTest) {
     ClassProject::ManagerImplementation manager;
@@ -854,15 +990,10 @@ TEST(ManagerTest, CoFactorTrueTest) {
     ClassProject::BDD_ID result_id = manager.coFactorTrue(result, id_b);
     EXPECT_EQ(size_before + 1, manager.uniqueTableSize());
 
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = id_and_result;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "a";
 
-
-    
-    Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
-
+    EXPECT_EQ(manager.topVar(result_id), id_a);
+    EXPECT_EQ(manager.coFactorTrue(result_id), id_and_result);
+    EXPECT_EQ(manager.coFactorFalse(result_id), manager.False());
 }
 
 
@@ -887,22 +1018,33 @@ TEST(ManagerTest, CoFactorTrue2Test) {
     ClassProject::BDD_ID result_id = manager.coFactorTrue(result, id_c);
     EXPECT_EQ(size_before + 2, manager.uniqueTableSize());
 
-
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = id_d;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "b";
-    ClassProject::BDD_ID new_b = size_before;
+    size_before = manager.uniqueTableSize();
+    ClassProject::BDD_ID id_b_and_d = manager.and2(id_b, id_d);
+    EXPECT_EQ(size_before, manager.uniqueTableSize());
 
 
-    Unique_identifier_EQ(manager.get_table_entry(new_b).identifier, identifier_result);
+
+    EXPECT_EQ(manager.getTopVarName(id_b_and_d), "b");
+    EXPECT_EQ(manager.topVar(id_b_and_d), id_b);
+    EXPECT_EQ(manager.coFactorTrue(id_b_and_d), id_d);
+    EXPECT_EQ(manager.coFactorFalse(id_b_and_d), manager.False());
+    EXPECT_EQ(manager.isVariable(id_b_and_d), false);
 
 
-    identifier_result.id_high = id_d;
-    identifier_result.id_low  = new_b;
-    identifier_result.top_var = "a";
 
-    Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
+
+
+    EXPECT_EQ(manager.getTopVarName(result_id), "a");
+    EXPECT_EQ(manager.topVar(result_id), id_a);
+    EXPECT_EQ(manager.coFactorTrue(result_id), id_d);
+    EXPECT_EQ(manager.coFactorFalse(result_id), id_b_and_d);
+    EXPECT_EQ(manager.isVariable(result_id), false);
+
+
+
+    ClassProject::BDD_ID result_id_x = manager.coFactorFalse(result_id, id_a);
+    EXPECT_EQ(result_id_x, id_b_and_d);
+    
 
 
     ClassProject::BDD_ID result_id_2 = manager.coFactorTrue(result_id, id_d);
@@ -910,13 +1052,7 @@ TEST(ManagerTest, CoFactorTrue2Test) {
     ClassProject::BDD_ID result_id_4 = manager.coFactorTrue(result_id_3, id_b);
 
 
-    identifier_result.id_high = ClassProject::ID_TRUE;
-    identifier_result.id_low  = ClassProject::ID_TRUE;
-    identifier_result.top_var = "1";
-
-    Unique_identifier_EQ(manager.get_table_entry(result_id_4).identifier, identifier_result);
-
-
+    EXPECT_EQ(result_id_4, manager.True());
 }
 
 
@@ -939,16 +1075,11 @@ TEST(ManagerTest, CoFactorFalseTest) {
 
     size_t size_before = manager.uniqueTableSize();
     ClassProject::BDD_ID result_id = manager.coFactorFalse(result, id_b);
-    //EXPECT_EQ(size_before + 1, manager.uniqueTableSize());
-
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "0";
+    EXPECT_EQ(size_before, manager.uniqueTableSize());
+    EXPECT_EQ(result_id, manager.False());
 
 
-    
-    Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
+    EXPECT_EQ(manager.coFactorFalse(id_d), manager.False());
 
 }
 
@@ -971,16 +1102,7 @@ TEST(ManagerTest, CoFactorFalse2Test) {
 
 
     ClassProject::BDD_ID result_id = manager.coFactorFalse(result, id_c);
-
-
-    ClassProject::Unique_identifier identifier_result;
-    identifier_result.id_high = ClassProject::ID_FALSE;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "0";
-
-
-    Unique_identifier_EQ(manager.get_table_entry(result_id).identifier, identifier_result);
-
+    EXPECT_EQ(result_id, manager.False());
 
 
     size_t size_before = manager.uniqueTableSize();
@@ -988,13 +1110,11 @@ TEST(ManagerTest, CoFactorFalse2Test) {
     EXPECT_EQ(size_before + 1, manager.uniqueTableSize());
 
 
-    identifier_result.id_high = id_and_result;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "a";
-
-
-    Unique_identifier_EQ(manager.get_table_entry(result_id_2).identifier, identifier_result);
-
+    EXPECT_EQ(manager.getTopVarName(result_id_2), "a");
+    EXPECT_EQ(manager.topVar(result_id_2), id_a);
+    EXPECT_EQ(manager.coFactorTrue(result_id_2), id_and_result);
+    EXPECT_EQ(manager.coFactorFalse(result_id_2), manager.False());
+    EXPECT_EQ(manager.isVariable(result_id_2), false);
 
 
 
@@ -1004,13 +1124,11 @@ TEST(ManagerTest, CoFactorFalse2Test) {
     EXPECT_EQ(size_before, manager.uniqueTableSize());
 
 
-    identifier_result.id_high = id_and_result;
-    identifier_result.id_low  = ClassProject::ID_FALSE;
-    identifier_result.top_var = "b";
-
-
-    Unique_identifier_EQ(manager.get_table_entry(result_id_3).identifier, identifier_result);
-
+    EXPECT_EQ(manager.getTopVarName(result_id_3), "b");
+    EXPECT_EQ(manager.topVar(result_id_3), id_b);
+    EXPECT_EQ(manager.coFactorTrue(result_id_3), id_and_result);
+    EXPECT_EQ(manager.coFactorFalse(result_id_3), manager.False());
+    EXPECT_EQ(manager.isVariable(result_id_3), false);
 }
 
 
