@@ -11,6 +11,13 @@
 namespace ClassProject {
 
 
+    ite_id::ite_id(BDD_ID x, BDD_ID y, BDD_ID z){
+        i = x;
+        t = y;
+        e = z;
+    }
+
+
     Unique_identifier::Unique_identifier(){
         id_low=-1;
         id_high=-1;
@@ -95,7 +102,11 @@ namespace ClassProject {
         if((t == 0 || t == 1) && (e == 0 || e == 1)){   //case "if" is unknown and t and e are bool.
             if(t == 1 && e== 0) return i;
         }
+        //end of terminal cases
 
+        //check for entry in computed-table
+        // if computed_table(i, t, e).has_entry() return computed_table_entry
+        if( hashing_computed_table.find(ite_id(i, t, e)) != hashing_computed_table.end()) return hashing_computed_table[ite_id(i,t,e)];
 
         //now check if triplet(top_variable, id_high=t, id_low=e) already exists in table
         //top variable is variable with least-ranking of our 3 ID's
@@ -187,7 +198,10 @@ namespace ClassProject {
             return h.second;    //return the ID that corresponds to this entry
         }
 
-        return add_table_entry(identifier, "label"); //improve label
+        int bdd_id = add_table_entry(identifier, "label"); //improve label
+        //add entry in computed_table_entry(i, t, e);
+        hashing_computed_table[ite_id(i, t, e)] = bdd_id;
+        return bdd_id;
     }
 
 

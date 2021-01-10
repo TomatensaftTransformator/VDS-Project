@@ -206,12 +206,19 @@ TEST(ManagerTest, iteTermincal2CasesTest) {
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
 
-    ClassProject::BDD_ID res1 = manager.ite(1, id_a, id_b);
-    ClassProject::BDD_ID res2 = manager.ite(0, id_a, id_b);
+
+    EXPECT_EQ(id_a, manager.ite(1, id_a, id_b));
+    EXPECT_EQ(id_b, manager.ite(0, id_a, id_b));
+    
+    EXPECT_EQ(id_a, manager.ite(id_a, 1, 0));
+    EXPECT_EQ(id_a, manager.ite(1, id_a, id_b));
+    EXPECT_EQ(id_a, manager.ite(0, id_b, id_a));
+    EXPECT_EQ(id_a, manager.ite(id_b, id_a, id_a));
 
 
-    EXPECT_EQ(id_a, res1);
-    EXPECT_EQ(id_b, res2);
+    ClassProject::BDD_ID not_a = manager.neg(id_a);
+    EXPECT_EQ(not_a, manager.ite(id_a, 0, 1));
+
 
 }
 

@@ -13,6 +13,7 @@
 #include <map> 
 #include <set>
 #include <string>
+#include <tuple>
 #include "ManagerInterface.h"
 
 namespace ClassProject {
@@ -40,6 +41,34 @@ namespace ClassProject {
         bool leaf;  //if the node represents a variable then this will be true
     };
 
+
+    class ite_id {
+    public:
+        ite_id(BDD_ID x, BDD_ID y, BDD_ID z);
+        BDD_ID i;
+        BDD_ID t;
+        BDD_ID e;
+
+
+        bool operator==(const ite_id &other) const
+        { return (i == other.i
+        && t == other.t
+        && e == other.e);
+        }
+    };
+
+
+
+    class MyHashFunction { 
+    public: 
+    
+        // Use sum of lengths of first and last names 
+        // as hash function. 
+        size_t operator()(const ite_id& key) const
+        { 
+            return key.i + key.t + key.e; //just used first noob function that came to my mind; can or rather sould be improved!!!!
+        } 
+    }; 
 
 
 
@@ -133,6 +162,8 @@ namespace ClassProject {
     private:
         BDD_ID latest_id_value;
         std::unordered_map<BDD_ID, Unique_table_entry> unique_table;
+        std::unordered_map<ite_id, BDD_ID, MyHashFunction> hashing_computed_table;
+
 
         std::map<std::string, BDD_ID> variable_to_id_map;
         std::map<std::string, int> variable_to_order_map;   //start with a simple : variable first added has highest order
