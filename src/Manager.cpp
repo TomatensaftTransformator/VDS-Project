@@ -31,7 +31,7 @@ namespace ClassProject {
     }
 
 
-    ManagerImplementation::ManagerImplementation(){
+    Manager::Manager(){
         //here initialize data-structure
         latest_id_value = LATEST_VALUE_INIT;
 
@@ -81,7 +81,7 @@ namespace ClassProject {
     }
 
 
-    BDD_ID ManagerImplementation::ite(const BDD_ID i, const BDD_ID t, const BDD_ID e){
+    BDD_ID Manager::ite(const BDD_ID i, const BDD_ID t, const BDD_ID e){
         //ite(i,t,e) = i*t + not(i)*e
         //case i) all 3 values are boolean then just evaluate i*t + not(i)*e
         if((i == 0 || i == 1) && (t == 0 || t == 1) && (e == 0 || e == 1)){
@@ -140,14 +140,16 @@ namespace ClassProject {
         identifier.id_high = t;
         identifier.id_low = e;
 
+        
         std::pair<bool, BDD_ID> h;
+        /*
         h = check_if_unique_identifier_in_table(identifier);
 
         if (h.first){
             //identifier already exists in table, thus just return the already existing ID
             return h.second;
         }
-
+        */
 
         BDD_ID i_high, i_low, t_high, t_low, e_high, e_low;
 
@@ -205,28 +207,28 @@ namespace ClassProject {
     }
 
 
-    const BDD_ID&  ManagerImplementation::True(){
+    const BDD_ID&  Manager::True(){
         return ID_TRUE;
     }
 
-    const BDD_ID&  ManagerImplementation::False(){
+    const BDD_ID&  Manager::False(){
         return ID_FALSE;
     }
 
-    bool ManagerImplementation::isConstant(const BDD_ID f){
+    bool Manager::isConstant(const BDD_ID f){
         if(f == ID_FALSE || f == ID_TRUE) return true;
         return false;
     }
 
-    size_t ManagerImplementation::uniqueTableSize(){
+    size_t Manager::uniqueTableSize(){
         return unique_table.size();
     }
 
-    bool ManagerImplementation::isVariable(const BDD_ID x){
+    bool Manager::isVariable(const BDD_ID x){
         return unique_table[x].is_variable;
     }
 
-    BDD_ID ManagerImplementation::createVar(const std::string &label){
+    BDD_ID Manager::createVar(const std::string &label){
         //first check variable already exists to avoid duplicate variable
         if(variable_to_id_map.find(label) != variable_to_id_map.end()){
             //variable already exists just return the id of this variable
@@ -256,62 +258,63 @@ namespace ClassProject {
         return latest_id_value;
     }
 
-    BDD_ID ManagerImplementation::topVar(const BDD_ID f){      //returns the ID of the top_variable of the node f
+    BDD_ID Manager::topVar(const BDD_ID f){      //returns the ID of the top_variable of the node f
         return variable_to_id_map[unique_table.at(f).identifier.top_var];
     }
 
 
-    BDD_ID ManagerImplementation::and2(const BDD_ID a, const BDD_ID b){
+    BDD_ID Manager::and2(const BDD_ID a, const BDD_ID b){
         return ite(a, b, ID_FALSE);
     }
 
-    BDD_ID ManagerImplementation::or2(const BDD_ID a, const BDD_ID b){
+    BDD_ID Manager::or2(const BDD_ID a, const BDD_ID b){
         return ite(a, ID_TRUE, b);
     }
 
-    BDD_ID ManagerImplementation::xor2(const BDD_ID a, const BDD_ID b){
+    BDD_ID Manager::xor2(const BDD_ID a, const BDD_ID b){
         //xor(a,b) = a*not(b) + not(a)*b
         BDD_ID not_a = neg(a);
         BDD_ID not_b =neg(b);
         BDD_ID and_case_1 =and2(a, not_b);
         BDD_ID and_case_2 =and2(not_a, b);
-        //return ite(ite(b, ID_FALSE, a), ID_TRUE, ite(a, ID_FALSE, b));
-        return or2(and_case_1, and_case_2);
+        return ite(ite(b, ID_FALSE, a), ID_TRUE, ite(a, ID_FALSE, b));
+        //return or2(and_case_1, and_case_2);
     }
 
-    BDD_ID ManagerImplementation::neg(const BDD_ID a){
+    BDD_ID Manager::neg(const BDD_ID a){
         return ite(a, ID_FALSE, ID_TRUE);
     }
 
-    BDD_ID ManagerImplementation::nand2(const BDD_ID a, const BDD_ID b){
+    BDD_ID Manager::nand2(const BDD_ID a, const BDD_ID b){
+        
         return neg(and2(a,b));
     }
 
-    BDD_ID ManagerImplementation::nor2(const BDD_ID a, const BDD_ID b){
+    BDD_ID Manager::nor2(const BDD_ID a, const BDD_ID b){
         return neg(or2(a,b));
     }
 
 
-    BDD_ID ManagerImplementation::coFactorFalse(const BDD_ID f, BDD_ID x){
+    BDD_ID Manager::coFactorFalse(const BDD_ID f, BDD_ID x){
         return coFactorCase(f,x,false);
     }
 
     
-      BDD_ID ManagerImplementation::coFactorTrue(const BDD_ID f, BDD_ID x){
+      BDD_ID Manager::coFactorTrue(const BDD_ID f, BDD_ID x){
         return coFactorCase(f,x,true);
     }
     
 
-    BDD_ID ManagerImplementation::coFactorTrue(const BDD_ID f){
+    BDD_ID Manager::coFactorTrue(const BDD_ID f){
         return unique_table.at(f).identifier.id_high;
     }
 
-    BDD_ID ManagerImplementation::coFactorFalse(const BDD_ID f){
+    BDD_ID Manager::coFactorFalse(const BDD_ID f){
         return unique_table.at(f).identifier.id_low;
     }
 
  
-      BDD_ID ManagerImplementation::coFactorCase(const BDD_ID f, BDD_ID x, bool cofactor_case){
+      BDD_ID Manager::coFactorCase(const BDD_ID f, BDD_ID x, bool cofactor_case){
         // cofactorcase == TRUE : coFactorTrue ; cofactorcase == FALSE : coFactorFalse
         //f is input function we use for our recursion
         //x is the id of the variable we want to do our cofactoring
@@ -351,7 +354,7 @@ namespace ClassProject {
     }
 
 
-    void ManagerImplementation::findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root){    //returns the set of BDD nodes whih are reachable from the BDD node root(including itself)
+    void Manager::findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root){    //returns the set of BDD nodes whih are reachable from the BDD node root(including itself)
         //traverse through "tree" starting at root.
         //go down until
         nodes_of_root.insert(root);
@@ -363,13 +366,13 @@ namespace ClassProject {
     }
 
 
-    std::string ManagerImplementation::getTopVarName(const BDD_ID &root){
+    std::string Manager::getTopVarName(const BDD_ID &root){
         return unique_table.at(root).identifier.top_var;
     }
 
 
 
-    void ManagerImplementation::findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root){
+    void Manager::findVars(const BDD_ID &root, std::set<BDD_ID> &vars_of_root){
         if (root == ID_FALSE || root == ID_TRUE) return;
 
         std::string var_name = getTopVarName(root);
@@ -385,11 +388,11 @@ namespace ClassProject {
 
     //function violates encapsulation of the private object
     //but is heavily used in the tests ... :(
-    Unique_table_entry ManagerImplementation::get_table_entry(BDD_ID x){
+    Unique_table_entry Manager::get_table_entry(BDD_ID x){
         return unique_table.at(x);
     }
 
-    BDD_ID ManagerImplementation::add_table_entry(Unique_identifier identifier, std::string label){
+    BDD_ID Manager::add_table_entry(Unique_identifier identifier, std::string label){
         latest_id_value++;
 
 
@@ -405,7 +408,7 @@ namespace ClassProject {
     }
 
 
-    std::pair<bool,BDD_ID> ManagerImplementation::check_if_unique_identifier_in_table(Unique_identifier x){
+    std::pair<bool,BDD_ID> Manager::check_if_unique_identifier_in_table(Unique_identifier x){
         //loop over all entries in table and check if we already hace this entry
         //first is the BDD_ID ; second is the table_entry
         for (std::pair<BDD_ID, Unique_table_entry> table_entry : unique_table){

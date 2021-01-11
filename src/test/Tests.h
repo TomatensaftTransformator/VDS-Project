@@ -12,21 +12,21 @@
 
 struct ManagerTest: testing::Test {
     ManagerTest(){
-        manager = ClassProject::ManagerImplementation ();
+        manager = ClassProject::Manager ();
     }
     
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 };
 
 
 
 TEST(InitializeTest, unique_table_size) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
     EXPECT_EQ(manager.uniqueTableSize(), 2);
 }
 
 TEST(InitializeTest, true_entry) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     EXPECT_EQ(manager.True(), 1);
@@ -38,7 +38,7 @@ TEST(InitializeTest, true_entry) {
 
 
 TEST(InitializeTest, false_entry) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     EXPECT_EQ(manager.False(), 0);
@@ -52,7 +52,7 @@ TEST(InitializeTest, false_entry) {
 
 
 TEST(ManagerTest, uniqueTableSizeTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
     size_t s = manager.uniqueTableSize();
     manager.createVar("a");
@@ -69,7 +69,7 @@ TEST(ManagerTest, uniqueTableSizeTest) {
 
 
 TEST(ManagerTest, isConstantTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
     size_t s = manager.uniqueTableSize();
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -98,7 +98,7 @@ TEST(ManagerTest, isConstantTest) {
 
 
 TEST(ManagerTest, ID_TRUE_FALSE) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     EXPECT_EQ(manager.True(), 1);
@@ -109,7 +109,7 @@ TEST(ManagerTest, ID_TRUE_FALSE) {
 
 
 TEST(ManagerTest, topVarTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -139,7 +139,7 @@ TEST(ManagerTest, topVarTest) {
 }
 
 TEST(ManagerTest, getTopVarNameTest){
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -160,7 +160,7 @@ TEST(ManagerTest, getTopVarNameTest){
 }
 
 TEST(ManagerTest, iteTermincalCasesTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
     //test the pure boolean cases first
     EXPECT_EQ(manager.ite(0,0,0), 0);
@@ -200,7 +200,7 @@ TEST(ManagerTest, iteTermincalCasesTest) {
 
 
 TEST(ManagerTest, iteTermincal2CasesTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -231,7 +231,7 @@ TEST(ManagerTest, iteTermincal2CasesTest) {
 
 
 TEST(ManagerTest, createVarTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     
@@ -303,7 +303,7 @@ TEST(ManagerTest, createVarTest) {
 
 
 TEST(ManagerTest, OrTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -337,7 +337,7 @@ TEST(ManagerTest, OrTest) {
 
 
 TEST(ManagerTest, AndTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -366,7 +366,7 @@ TEST(ManagerTest, AndTest) {
 
 
 TEST(ManagerTest, NegationTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
@@ -402,8 +402,72 @@ TEST(ManagerTest, NegationTest) {
 
 
 
+
+
+
+TEST(ManagerTest, Negation2Test) {
+    ClassProject::Manager manager;
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+
+
+
+    ClassProject::BDD_ID result_id =  manager.neg(manager.and2(id_a, id_b));
+    ClassProject::BDD_ID id_not_b  =  manager.neg(id_b);
+    
+
+
+
+    EXPECT_EQ(manager.getTopVarName(result_id), "a");
+    EXPECT_EQ(manager.topVar(result_id), id_a);
+    EXPECT_EQ(manager.coFactorTrue(result_id),id_not_b);
+    EXPECT_EQ(manager.coFactorFalse(result_id), manager.True());
+    EXPECT_EQ(manager.isVariable(result_id), false);
+
+    ClassProject::BDD_ID id_nand_ab =  manager.nand2(id_a, id_b);
+    EXPECT_EQ(id_nand_ab, result_id);
+
+    EXPECT_EQ(manager.and2(id_a, id_b), manager.neg(result_id));
+
+
+}
+
+
+
+TEST(ManagerTest, Negation3Test) {
+    ClassProject::Manager manager;
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+
+
+
+    ClassProject::BDD_ID result_id =  manager.neg(manager.or2(id_a, id_b));
+    ClassProject::BDD_ID id_not_b  =  manager.neg(id_b);
+    
+
+
+
+    EXPECT_EQ(manager.getTopVarName(result_id), "a");
+    EXPECT_EQ(manager.topVar(result_id), id_a);
+    EXPECT_EQ(manager.coFactorTrue(result_id),manager.False());
+    EXPECT_EQ(manager.coFactorFalse(result_id), id_not_b);
+    EXPECT_EQ(manager.isVariable(result_id), false);
+
+    ClassProject::BDD_ID id_nor_ab =  manager.nor2(id_a, id_b);
+    EXPECT_EQ(id_nor_ab, result_id);
+
+    EXPECT_EQ(manager.or2(id_a, id_b), manager.neg(result_id));
+
+    
+}
+
+
+
+
 TEST(ManagerTest, NandTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -444,7 +508,7 @@ TEST(ManagerTest, NandTest) {
 
 
 TEST(ManagerTest, NorTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -474,7 +538,7 @@ TEST(ManagerTest, NorTest) {
 
 
 TEST(ManagerTest, XorTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -510,8 +574,93 @@ TEST(ManagerTest, XorTest) {
 }
 
 
+
+TEST(ManagerTest, Xor3Test) {
+    ClassProject::Manager manager;
+
+
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+
+
+    ClassProject::BDD_ID id_not_b = manager.neg(id_b); //xor(a,b) = a*not(b) + not(a)*b
+    ClassProject::BDD_ID id_xor_ab = manager.xor2(id_a,id_b); //xor(a,b) = a*not(b) + not(a)*b
+    ClassProject::BDD_ID id_result = manager.xor2(id_xor_ab, id_c); //xor(a,b) = a*not(b) + not(a)*b
+    
+    ClassProject::BDD_ID id_not_a = manager.neg(id_a);
+    ClassProject::BDD_ID id_not_xor_ab = manager.neg(id_xor_ab);
+
+
+    //should create through recursion a entry for not(b) and for not(a)).
+    //should create a entry for a*not(b) ; not(b)*a
+
+    EXPECT_EQ(manager.getTopVarName(id_result), "c");
+    EXPECT_EQ(manager.topVar(id_result), id_c);
+    EXPECT_EQ(manager.coFactorTrue(id_result), id_not_xor_ab);
+    EXPECT_EQ(manager.coFactorFalse(id_result), id_xor_ab);
+    EXPECT_EQ(manager.isVariable(id_result), false);
+
+    //bug!!!!
+    EXPECT_EQ(manager.getTopVarName(id_not_xor_ab), "b");
+    EXPECT_EQ(manager.topVar(id_not_xor_ab), id_b);
+    EXPECT_EQ(manager.coFactorTrue(id_not_xor_ab), id_a);
+    EXPECT_EQ(manager.coFactorFalse(id_not_xor_ab), id_not_a);
+    EXPECT_EQ(manager.isVariable(id_not_xor_ab), false);
+    //end bug!!!
+
+
+    EXPECT_EQ(manager.getTopVarName(id_xor_ab), "b");
+    EXPECT_EQ(manager.topVar(id_xor_ab), id_b);
+    EXPECT_EQ(manager.coFactorTrue(id_xor_ab), id_not_a);
+    EXPECT_EQ(manager.coFactorFalse(id_xor_ab), id_a);
+    EXPECT_EQ(manager.isVariable(id_xor_ab), false);
+
+
+}
+
+
+
+
+
+
+TEST(ManagerTest, negXorTest) {
+    ClassProject::Manager manager;
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+
+
+    ClassProject::BDD_ID id_not_b = manager.neg(id_b); //xor(a,b) = a*not(b) + not(a)*b
+    ClassProject::BDD_ID id_xor_ab = manager.xor2(id_a,id_b); //xor(a,b) = a*not(b) + not(a)*b
+    
+    ClassProject::BDD_ID id_not_xor_ab = manager.neg(id_xor_ab);
+
+
+
+    //bug!!!!
+    EXPECT_EQ(manager.getTopVarName(id_not_xor_ab), "a");
+    EXPECT_EQ(manager.topVar(id_not_xor_ab), id_a);
+    EXPECT_EQ(manager.coFactorTrue(id_not_xor_ab), id_b);
+    EXPECT_EQ(manager.coFactorFalse(id_not_xor_ab), id_not_b);
+    EXPECT_EQ(manager.isVariable(id_not_xor_ab), false);
+    //end bug!!!
+
+
+    EXPECT_EQ(manager.getTopVarName(id_xor_ab), "a");
+    EXPECT_EQ(manager.topVar(id_xor_ab), id_a);
+    EXPECT_EQ(manager.coFactorTrue(id_xor_ab), id_not_b);
+    EXPECT_EQ(manager.coFactorFalse(id_xor_ab), id_b);
+    EXPECT_EQ(manager.isVariable(id_xor_ab), false);
+
+
+}
+
+
+
+
 TEST(ManagerTest, UniqueTableExampleTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -549,7 +698,7 @@ TEST(ManagerTest, UniqueTableExampleTest) {
 
 
 TEST(ManagerTest, UniqueTable2Test) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -603,7 +752,7 @@ TEST(ManagerTest, UniqueTable2Test) {
 
 
 TEST(ManagerTest, UniqueTable3Test) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -789,7 +938,7 @@ TEST(ManagerTest, UniqueTable3Test) {
 
 
 TEST(ManagerTest, UniqueTable4Test) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -873,7 +1022,7 @@ TEST(ManagerTest, UniqueTable4Test) {
 
 
 TEST(ManagerTest, findNodesTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -908,7 +1057,7 @@ TEST(ManagerTest, findNodesTest) {
 
 
 TEST(ManagerTest, findVarsTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -951,7 +1100,7 @@ TEST(ManagerTest, findVarsTest) {
 
 
 TEST(ManagerTest, findVars2Test) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -977,22 +1126,8 @@ TEST(ManagerTest, findVars2Test) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 TEST(ManagerTest, CoFactorTrueTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -1019,7 +1154,7 @@ TEST(ManagerTest, CoFactorTrueTest) {
 
 
 TEST(ManagerTest, CoFactorTrue2Test) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -1079,7 +1214,7 @@ TEST(ManagerTest, CoFactorTrue2Test) {
 
 
 TEST(ManagerTest, CoFactorFalseTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -1106,7 +1241,7 @@ TEST(ManagerTest, CoFactorFalseTest) {
 
 
 TEST(ManagerTest, CoFactorFalse2Test) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -1153,7 +1288,7 @@ TEST(ManagerTest, CoFactorFalse2Test) {
 
 
 TEST(ManagerTest, CoFactorAndVariableTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
@@ -1203,7 +1338,7 @@ TEST(ManagerTest, CoFactorAndVariableTest) {
 
 
 TEST(ManagerTest, DuplicateEntryTest) {
-    ClassProject::ManagerImplementation manager;
+    ClassProject::Manager manager;
 
 
     ClassProject::BDD_ID id_a = manager.createVar("a");

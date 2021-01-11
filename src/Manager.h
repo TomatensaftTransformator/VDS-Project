@@ -112,9 +112,9 @@ namespace ClassProject {
             bool is_variable;   //is true if the entry of this ID is a variable; false if not.
     };
 
-    class ManagerImplementation : public ManagerInterface {
+    class Manager : public ManagerInterface {
     public:
-        ManagerImplementation();    //Constructor
+        Manager();    //Constructor
 
         BDD_ID ite(const BDD_ID i, const BDD_ID t, const BDD_ID e);
 
