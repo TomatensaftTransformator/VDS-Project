@@ -14,6 +14,7 @@
 #include <set>
 #include <string>
 #include <tuple>
+#include <climits>
 #include "ManagerInterface.h"
 
 namespace ClassProject {
@@ -61,12 +62,9 @@ namespace ClassProject {
 
     class MyHashFunction { 
     public: 
-    
-        // Use sum of lengths of first and last names 
-        // as hash function. 
         size_t operator()(const ite_id& key) const
         { 
-            return key.i + key.t + key.e; //just used first noob function that came to my mind; can or rather sould be improved!!!!
+            return key.i * 3 + key.t * 5 + key.e * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
         } 
     }; 
 
@@ -170,8 +168,6 @@ namespace ClassProject {
     
         BDD_ID add_table_entry(Unique_identifier identifier, std::string label);
         std::pair<bool, BDD_ID> check_if_unique_identifier_in_table(Unique_identifier x);
-        Unique_table_entry get_table_entry(BDD_ID x);
-
     };
 }
 

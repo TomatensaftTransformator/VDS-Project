@@ -77,7 +77,8 @@ namespace ClassProject {
         unique_table.insert (false_entrie_pair);    
         variable_to_id_map["0"] = ID_FALSE;
 
-    
+
+        variable_to_order_map[""] = INT_MAX;
     }
 
 
@@ -99,79 +100,63 @@ namespace ClassProject {
 
         if (t==e) return t;
 
-        if((t == 0 || t == 1) && (e == 0 || e == 1)){   //case "if" is unknown and t and e are bool.
-            if(t == 1 && e== 0) return i;
-        }
+        if(t == 1 && e== 0) return i;
         //end of terminal cases
 
         //check for entry in computed-table
         // if computed_table(i, t, e).has_entry() return computed_table_entry
         if( hashing_computed_table.find(ite_id(i, t, e)) != hashing_computed_table.end()) return hashing_computed_table[ite_id(i,t,e)];
 
-        //now check if triplet(top_variable, id_high=t, id_low=e) already exists in table
-        //top variable is variable with least-ranking of our 3 ID's
-        //get top variable of ID
-        
-        std::string top_var_priority;
 
+
+        //get top variable of ID; top variable is variable with least-ranking of our 3 ID's
+        std::string top_var_priority = "";
+
+        Unique_identifier identifier_i = unique_table.at(i).identifier;
         if (!(i == 0 || i == 1)){
-            std::string top_var_i = unique_table.at(i).identifier.top_var;
-            top_var_priority = top_var_i;
+            top_var_priority = identifier_i.top_var;
         }
         
+
+        Unique_identifier identifier_t = unique_table.at(t).identifier;
         if (!(t == 0 || t == 1)) {
-            std::string top_var_t = unique_table.at(t).identifier.top_var;
-            if(variable_to_order_map[top_var_t] < variable_to_order_map[top_var_priority]){
-                top_var_priority = top_var_t;
+            if(variable_to_order_map[identifier_t.top_var] < variable_to_order_map[top_var_priority]){
+                top_var_priority = identifier_t.top_var;
             }
         }
 
+
+        Unique_identifier identifier_e = unique_table.at(e).identifier;
         if (!(e == 0 || e == 1)){
-            std::string top_var_e = unique_table.at(e).identifier.top_var;
-            if(variable_to_order_map[top_var_e] < variable_to_order_map[top_var_priority]){
-                top_var_priority = top_var_e;
+            if(variable_to_order_map[identifier_e.top_var] < variable_to_order_map[top_var_priority]){
+                top_var_priority = identifier_e.top_var;
             }
         }
         
 
-        //access top_variable through table
-        Unique_identifier identifier;
-        identifier.top_var = top_var_priority;
-        identifier.id_high = t;
-        identifier.id_low = e;
-
-        
-        std::pair<bool, BDD_ID> h;
-        /*
-        h = check_if_unique_identifier_in_table(identifier);
-
-        if (h.first){
-            //identifier already exists in table, thus just return the already existing ID
-            return h.second;
-        }
-        */
+        int top_var_priority_id = variable_to_id_map[top_var_priority];
 
         BDD_ID i_high, i_low, t_high, t_low, e_high, e_low;
 
-        if (unique_table.at(i).identifier.top_var == top_var_priority){
-            i_high = unique_table.at(i).identifier.id_high;
-            i_low = unique_table.at(i).identifier.id_low;
+        if (variable_to_id_map[identifier_i.top_var] == top_var_priority_id){
+            i_high = identifier_i.id_high;
+            i_low = identifier_i.id_low;
         } else{
             i_high = i;
             i_low =  i;
         }
 
-        if (unique_table.at(t).identifier.top_var == top_var_priority){
-            t_high = unique_table.at(t).identifier.id_high;
-            t_low = unique_table.at(t).identifier.id_low;
+        if (variable_to_id_map[identifier_t.top_var] == top_var_priority_id){
+            t_high = identifier_t.id_high;
+            t_low = identifier_t.id_low;
         } else{
             t_high = t;
             t_low = t;
         }
 
-        if (unique_table.at(e).identifier.top_var == top_var_priority){
-            e_high = unique_table.at(e).identifier.id_high;
-            e_low = unique_table.at(e).identifier.id_low;
+        if (variable_to_id_map[identifier_e.top_var] == top_var_priority_id){
+            e_high = identifier_e.id_high;
+            e_low  = identifier_e.id_low;
         } else{
             e_high = e;
             e_low = e;
@@ -187,22 +172,22 @@ namespace ClassProject {
         if (recursion_high == recursion_low) return recursion_high;
 
 
+        Unique_identifier identifier;
+
         //add result to unique_table, if its not already in table
         identifier.top_var = top_var_priority;
         identifier.id_high = recursion_high;
         identifier.id_low = recursion_low;
 
         //check for duplicates before adding
+        std::pair<bool, BDD_ID> h;
         h = check_if_unique_identifier_in_table(identifier);
 
-        if (h.first){
-            //identifier already exists in table, thus just return the already existing ID
-            return h.second;    //return the ID that corresponds to this entry
-        }
+        if (h.first) return h.second; //identifier already return the ID that corresponds to this entry
 
         int bdd_id = add_table_entry(identifier, "label"); //improve label
-        //add entry in computed_table_entry(i, t, e);
-        hashing_computed_table[ite_id(i, t, e)] = bdd_id;
+        hashing_computed_table[ite_id(i, t, e)] = bdd_id; //add entry in computed_table_entry(i, t, e);
+
         return bdd_id;
     }
 
@@ -277,8 +262,8 @@ namespace ClassProject {
         BDD_ID not_b =neg(b);
         BDD_ID and_case_1 =and2(a, not_b);
         BDD_ID and_case_2 =and2(not_a, b);
-        return ite(ite(b, ID_FALSE, a), ID_TRUE, ite(a, ID_FALSE, b));
-        //return or2(and_case_1, and_case_2);
+        //return ite(ite(b, ID_FALSE, a), ID_TRUE, ite(a, ID_FALSE, b));
+        return or2(and_case_1, and_case_2);
     }
 
     BDD_ID Manager::neg(const BDD_ID a){
@@ -384,13 +369,6 @@ namespace ClassProject {
         findVars(node.identifier.id_high, vars_of_root);
     }
 
-
-
-    //function violates encapsulation of the private object
-    //but is heavily used in the tests ... :(
-    Unique_table_entry Manager::get_table_entry(BDD_ID x){
-        return unique_table.at(x);
-    }
 
     BDD_ID Manager::add_table_entry(Unique_identifier identifier, std::string label){
         latest_id_value++;
