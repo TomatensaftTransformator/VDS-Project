@@ -77,8 +77,6 @@ namespace ClassProject {
         unique_table.insert (false_entrie_pair);    
         variable_to_id_map["0"] = ID_FALSE;
 
-
-        variable_to_order_map[""] = INT_MAX;
     }
 
 
@@ -110,26 +108,30 @@ namespace ClassProject {
 
 
         //get top variable of ID; top variable is variable with least-ranking of our 3 ID's
-        std::string top_var_priority = "";
+        std::string top_var_priority;
+        int top_var_id_order = INT_MAX;
 
         Unique_identifier identifier_i = unique_table.at(i).identifier;
         if (!(i == 0 || i == 1)){
             top_var_priority = identifier_i.top_var;
+            top_var_id_order = variable_to_order_map[top_var_priority];
         }
         
 
         Unique_identifier identifier_t = unique_table.at(t).identifier;
         if (!(t == 0 || t == 1)) {
-            if(variable_to_order_map[identifier_t.top_var] < variable_to_order_map[top_var_priority]){
+            if(variable_to_order_map[identifier_t.top_var] < top_var_id_order){
                 top_var_priority = identifier_t.top_var;
+                top_var_id_order = variable_to_order_map[top_var_priority];
             }
         }
 
 
         Unique_identifier identifier_e = unique_table.at(e).identifier;
         if (!(e == 0 || e == 1)){
-            if(variable_to_order_map[identifier_e.top_var] < variable_to_order_map[top_var_priority]){
+            if(variable_to_order_map[identifier_e.top_var] < top_var_id_order){
                 top_var_priority = identifier_e.top_var;
+                top_var_id_order = variable_to_order_map[top_var_priority];
             }
         }
         

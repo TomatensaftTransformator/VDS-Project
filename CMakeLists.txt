@@ -7,7 +7,8 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 ${LLVM_CXX_FLAGS} ")
 
 add_subdirectory(src/external)  #gtest
 add_subdirectory(src/verify)    #verify
-add_subdirectory(src/bench)    #verify
+add_subdirectory(src/bench)    #bench
+add_subdirectory(src/reachable)    #reachable
 
 #Include dirs
 include_directories(${CMAKE_SOURCE_DIR}/src)
@@ -24,6 +25,9 @@ link_directories(${CMAKE_SOURCE_DIR}/src/verify/)
 include_directories(${CMAKE_SOURCE_DIR}/src/bench/)
 link_directories(${CMAKE_SOURCE_DIR}/src/bench/)
 
+
+include_directories(${CMAKE_SOURCE_DIR}/src/reachable/)
+link_directories(${CMAKE_SOURCE_DIR}/src/reachable/)
 
 
 add_subdirectory(src)
