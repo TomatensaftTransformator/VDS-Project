@@ -22,26 +22,6 @@ namespace ClassProject {
     const BDD_ID ID_FALSE = 0;
     const BDD_ID LATEST_VALUE_INIT = 1;
 
-    //classes for building own syntax-tree from function input, maybe move an own file in own folder.
-    class abstract_snytax_tree_node {
-    public:
-        bool is_leaf() {
-            return leaf;
-        }
-
-        abstract_snytax_tree_node* get_parent();
-        abstract_snytax_tree_node* get_left_child();
-        abstract_snytax_tree_node* get_right_child();
-
-    private:
-        abstract_snytax_tree_node * parent;
-        abstract_snytax_tree_node * left_child;
-        abstract_snytax_tree_node * right_child;
-
-        std::string name;    //name of node, is either name of a function or of a variable
-        bool leaf;  //if the node represents a variable then this will be true
-    };
-
 
     class ite_id {
     public:
@@ -65,20 +45,11 @@ namespace ClassProject {
         size_t operator()(const ite_id& key) const
         { 
             return key.i * 3 + key.t * 5 + key.e * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
+            //return pow(3,key.i) *pow(5,key.t) *pow(7, key.e); //just used first noob function that came to my mind; can or rather sould be improved!!!!
+
         } 
     }; 
 
-
-
-    class Abstract_syntax_tree {
-    public:
-        abstract_snytax_tree_node* get_root();
-        std::string get_tree_name();
-
-    private:
-        std::string name;
-        abstract_snytax_tree_node * root;
-    };
 
 
     class Unique_identifier {
@@ -95,7 +66,25 @@ namespace ClassProject {
                         && id_low == other.id_low
                         && id_high == other.id_high);
             }
+
+            bool operator<(const Unique_identifier &ob) const
+            {
+                if (id_low != ob.id_low) return id_low < ob.id_high;
+                if (id_high != ob.id_high) id_high < ob.id_high;
+                return top_var.compare(ob.top_var) < 0;
+            }
     };
+
+
+
+        class MyHashFunction2 { 
+    public: 
+        size_t operator()(const Unique_identifier& key) const
+        { 
+            return key.id_low * 3 + key.id_high * 5 + key.top_var.size() * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
+        } 
+    }; 
+
 
 
     //end of classes for absract-syntax-tree handling
@@ -109,6 +98,10 @@ namespace ClassProject {
             std::string label;
             bool is_variable;   //is true if the entry of this ID is a variable; false if not.
     };
+
+
+
+
 
     class Manager : public ManagerInterface {
     public:
@@ -160,14 +153,15 @@ namespace ClassProject {
     private:
         BDD_ID latest_id_value;
         std::unordered_map<BDD_ID, Unique_table_entry> unique_table;
+        std::unordered_map<Unique_identifier, BDD_ID, MyHashFunction2> unique_table_reverse;
+
         std::unordered_map<ite_id, BDD_ID, MyHashFunction> hashing_computed_table;
 
 
         std::map<std::string, BDD_ID> variable_to_id_map;
         std::map<std::string, int> variable_to_order_map;   //start with a simple : variable first added has highest order
-    
+
         BDD_ID add_table_entry(Unique_identifier identifier, std::string label);
-        std::pair<bool, BDD_ID> check_if_unique_identifier_in_table(Unique_identifier x);
     };
 }
 

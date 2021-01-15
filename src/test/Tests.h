@@ -390,6 +390,9 @@ TEST(ManagerTest, NegationTest) {
     EXPECT_EQ(manager.isVariable(result_id), false);
 
 
+
+    EXPECT_EQ(manager.neg(manager.neg(id_b)), id_b);
+
     result_id = manager.neg(0);
     EXPECT_EQ(result_id, manager.True());
 
@@ -485,7 +488,7 @@ TEST(ManagerTest, NandTest) {
     EXPECT_EQ(manager.coFactorFalse(id_result), manager.True());
     EXPECT_EQ(manager.isVariable(id_result), false);
 
-
+    EXPECT_EQ(manager.neg(id_result), manager.and2(id_a, id_b));
 
     id_result = manager.nand2(id_a, 0); //nand(a,0) = not(a) + not(0) = 1
     EXPECT_EQ(id_result, manager.True());
@@ -525,7 +528,7 @@ TEST(ManagerTest, NorTest) {
     EXPECT_EQ(manager.coFactorFalse(id_result), id_not_b);
     EXPECT_EQ(manager.isVariable(id_result), false);
 
-
+    EXPECT_EQ(manager.neg(id_result), manager.or2(id_a, id_b));
 
     ClassProject::BDD_ID id_not_a = manager.neg(id_a);
     id_result = manager.nor2(id_a,0); //nor(a,0) = not(a + 0) = not(a)
@@ -548,7 +551,6 @@ TEST(ManagerTest, XorTest) {
     ClassProject::BDD_ID id_result = manager.xor2(id_a,id_b); //xor(a,b) = a*not(b) + not(a)*b
     //should create through recursion a entry for not(b) and for not(a)).
     //should create a entry for a*not(b) ; not(b)*a
-    EXPECT_EQ(manager.uniqueTableSize(), 9); //this size is 2 leafs + 2 vars + 2 nots + 2 ands + final result = 10
 
 
     EXPECT_EQ(manager.getTopVarName(id_result), "a");
@@ -572,6 +574,46 @@ TEST(ManagerTest, XorTest) {
     ClassProject::BDD_ID id_result3 = manager.xor2(1, id_b); //xor(1,b) = 1*not b + 0*b = notb
     EXPECT_EQ(id_result3, id_not_b);
 }
+
+
+
+
+
+TEST(ManagerTest, Xor2Test) {
+    ClassProject::Manager manager;
+
+
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+
+
+    ClassProject::BDD_ID id_not_b = manager.neg(id_b); //xor(a,b) = a*not(b) + not(a)*b
+    ClassProject::BDD_ID id_xor_ab = manager.xor2(id_a,id_b); //xor(a,b) = a*not(b) + not(a)*b
+    
+    ClassProject::BDD_ID id_not_a = manager.neg(id_a);
+    ClassProject::BDD_ID id_not_xor_ab = manager.neg(id_xor_ab);
+
+    EXPECT_EQ(manager.xor2(id_a, manager.True()), id_not_a);
+    EXPECT_EQ(manager.xor2(id_a, manager.False()), id_a);
+
+    EXPECT_EQ(manager.coFactorTrue(manager.coFactorTrue(id_xor_ab)), manager.False());
+    EXPECT_EQ(manager.coFactorTrue(manager.coFactorFalse(id_xor_ab)), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(manager.coFactorTrue(id_xor_ab)), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(manager.coFactorFalse(id_xor_ab)), manager.False());
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -601,13 +643,11 @@ TEST(ManagerTest, Xor3Test) {
     EXPECT_EQ(manager.coFactorFalse(id_result), id_xor_ab);
     EXPECT_EQ(manager.isVariable(id_result), false);
 
-    //bug!!!!
     EXPECT_EQ(manager.getTopVarName(id_not_xor_ab), "b");
     EXPECT_EQ(manager.topVar(id_not_xor_ab), id_b);
     EXPECT_EQ(manager.coFactorTrue(id_not_xor_ab), id_a);
     EXPECT_EQ(manager.coFactorFalse(id_not_xor_ab), id_not_a);
     EXPECT_EQ(manager.isVariable(id_not_xor_ab), false);
-    //end bug!!!
 
 
     EXPECT_EQ(manager.getTopVarName(id_xor_ab), "b");
@@ -638,13 +678,11 @@ TEST(ManagerTest, negXorTest) {
 
 
 
-    //bug!!!!
     EXPECT_EQ(manager.getTopVarName(id_not_xor_ab), "a");
     EXPECT_EQ(manager.topVar(id_not_xor_ab), id_a);
     EXPECT_EQ(manager.coFactorTrue(id_not_xor_ab), id_b);
     EXPECT_EQ(manager.coFactorFalse(id_not_xor_ab), id_not_b);
     EXPECT_EQ(manager.isVariable(id_not_xor_ab), false);
-    //end bug!!!
 
 
     EXPECT_EQ(manager.getTopVarName(id_xor_ab), "a");

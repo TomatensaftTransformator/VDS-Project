@@ -53,8 +53,7 @@ namespace ClassProject {
         auto true_entrie_pair = std::make_pair(ID_TRUE, TRUE_entry);
         unique_table.insert (true_entrie_pair);
         variable_to_id_map["1"] = ID_TRUE;
-
-
+        unique_table_reverse[TRUE_identifier] = ID_TRUE;
         //unique_table[ID_TRUE] = TRUE_entry;  //add new variable entry to the table
 
 
@@ -74,9 +73,9 @@ namespace ClassProject {
         //unique_table[ID_FALSE] = FALSE_entry;  //add new variable entry to the table
 
         auto false_entrie_pair = std::make_pair(ID_FALSE, FALSE_entry);
-        unique_table.insert (false_entrie_pair);    
+        unique_table.insert (false_entrie_pair);
+        unique_table_reverse[FALSE_identifier] = ID_FALSE;    
         variable_to_id_map["0"] = ID_FALSE;
-
     }
 
 
@@ -182,10 +181,12 @@ namespace ClassProject {
         identifier.id_low = recursion_low;
 
         //check for duplicates before adding
-        std::pair<bool, BDD_ID> h;
-        h = check_if_unique_identifier_in_table(identifier);
-
-        if (h.first) return h.second; //identifier already return the ID that corresponds to this entry
+        auto it = unique_table_reverse.find(identifier);
+        if (it != unique_table_reverse.end()) return unique_table_reverse[identifier];
+        
+        //std::pair<bool, BDD_ID> h;
+        //h = check_if_unique_identifier_in_table(identifier);
+        //if (h.first) return h.second; //identifier already return the ID that corresponds to this entry
 
         int bdd_id = add_table_entry(identifier, "label"); //improve label
         hashing_computed_table[ite_id(i, t, e)] = bdd_id; //add entry in computed_table_entry(i, t, e);
@@ -241,7 +242,8 @@ namespace ClassProject {
         variable_to_order_map[label] = latest_id_value;
         variable_to_id_map[label] = latest_id_value;
         unique_table[latest_id_value] = new_entry;  //add new variable entry to the table
-        
+        unique_table_reverse[identifier] = latest_id_value;
+
         return latest_id_value;
     }
 
@@ -260,12 +262,12 @@ namespace ClassProject {
 
     BDD_ID Manager::xor2(const BDD_ID a, const BDD_ID b){
         //xor(a,b) = a*not(b) + not(a)*b
-        BDD_ID not_a = neg(a);
-        BDD_ID not_b =neg(b);
-        BDD_ID and_case_1 =and2(a, not_b);
-        BDD_ID and_case_2 =and2(not_a, b);
-        //return ite(ite(b, ID_FALSE, a), ID_TRUE, ite(a, ID_FALSE, b));
-        return or2(and_case_1, and_case_2);
+        //BDD_ID not_a = neg(a);
+        //BDD_ID not_b =neg(b);
+        //BDD_ID and_case_1 =and2(a, not_b);
+        //BDD_ID and_case_2 =and2(not_a, b);
+        return ite(ite(b, ID_FALSE, a), ID_TRUE, ite(a, ID_FALSE, b));
+        //return or2(and_case_1, and_case_2);
     }
 
     BDD_ID Manager::neg(const BDD_ID a){
@@ -330,12 +332,12 @@ namespace ClassProject {
         identifier.id_low = recursion_low;
 
         //check for duplicates before adding
-        auto h = check_if_unique_identifier_in_table(identifier);
+        auto it = unique_table_reverse.find(identifier);
+        if (it != unique_table_reverse.end()) return unique_table_reverse[identifier];
 
-        if (h.first){
-            //identifier already exists in table, thus just return the already existing ID
-            return h.second;    //return the ID that corresponds to this entry
-        }
+        //std::pair<bool, BDD_ID> h;
+        //h = check_if_unique_identifier_in_table(identifier);
+        //if (h.first) return h.second; //identifier already return the ID that corresponds to this entry
 
         return add_table_entry(identifier, "label"); //improve label
     }
@@ -383,17 +385,8 @@ namespace ClassProject {
         new_entry.is_variable = false;
 
         unique_table[latest_id_value] = new_entry;  //add new variable entry to the table
-        
+        unique_table_reverse[identifier] = latest_id_value;    
+
         return latest_id_value;
-    }
-
-
-    std::pair<bool,BDD_ID> Manager::check_if_unique_identifier_in_table(Unique_identifier x){
-        //loop over all entries in table and check if we already hace this entry
-        //first is the BDD_ID ; second is the table_entry
-        for (std::pair<BDD_ID, Unique_table_entry> table_entry : unique_table){
-            if (table_entry.second.identifier == x) return std::make_pair(true, table_entry.first);
-        }
-        return std::make_pair(false,-1);    //BDD_ID not of interest in this case
     }
 }
