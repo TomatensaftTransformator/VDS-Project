@@ -30,15 +30,17 @@ namespace ClassProject {
             
             void init();
 
+            BDD_ID getInitalStateCharacteristic();
+
         private:
             std::vector<BDD_ID> states;
             std::vector<BDD_ID> nextStates;
             std::vector<BDD_ID> stateTransitions;
             std::vector<BDD_ID> transitionRelationBitwise;
-            std::vector<bool> initialState;
 
             BDD_ID transitionRelation;
             BDD_ID initialStateCharacteristicFunction;
+            BDD_ID reachableStatesCharacteristicFunction;
 
     };
 
