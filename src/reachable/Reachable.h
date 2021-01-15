@@ -32,11 +32,16 @@ namespace ClassProject {
 
             BDD_ID getInitalStateCharacteristic();
 
+            BDD_ID createInputVariable(const std::string &label);
+
+
         private:
             std::vector<BDD_ID> states;
             std::vector<BDD_ID> nextStates;
             std::vector<BDD_ID> stateTransitions;
             std::vector<BDD_ID> transitionRelationBitwise;
+
+            std::vector<BDD_ID> inputVariables; 
 
             BDD_ID transitionRelation;
             BDD_ID initialStateCharacteristicFunction;

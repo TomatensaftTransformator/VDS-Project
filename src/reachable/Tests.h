@@ -197,8 +197,6 @@ TEST(managerTest, initialState3Test) {
 
 
 TEST(managerTest, HowTo_Example) {
-
-    
     ClassProject::Reachable comp(2);
     
     comp.init();
@@ -223,9 +221,233 @@ TEST(managerTest, HowTo_Example) {
     ASSERT_TRUE(comp.is_reachable({false,false}));
     ASSERT_FALSE(comp.is_reachable({true,false}));
     ASSERT_FALSE(comp.is_reachable({false,true}));
+}
+
+
+
+TEST(managerTest, FSM1Test) {
+    ClassProject::Reachable comp(3);
+    
+    comp.init();
+    
+    auto states = comp.getStates();
+    std::vector<BDD_ID> functions;
+
+    auto s0 = states.at(0);
+    auto s1 = states.at(1);
+    auto s2 = states.at(2);
+    //s0' = not(s0)
+    functions.push_back(comp.True());//s0'
+    //s1' = not(s1)
+    functions.push_back(comp.False()); //s1'
+    functions.push_back(comp.True()); //s2'
+    //Add transition functions
+    comp.setDelta(functions);
+    //Add init state
+    comp.setInitState({true,false, true});
+
+    comp.compute_reachable_states();
+
+    //FSM has only self-loop on initial-state
+    ASSERT_TRUE(comp.is_reachable({true,false, true}));
+    ASSERT_FALSE(comp.is_reachable({true,true, true}));
+    ASSERT_FALSE(comp.is_reachable({false,false, false}));
+    ASSERT_FALSE(comp.is_reachable({true,false, false}));
+    ASSERT_FALSE(comp.is_reachable({false,false, true}));
+    ASSERT_FALSE(comp.is_reachable({false,false, false}));
+}
+
+
+
+
+TEST(managerTest, FSM2Test) {
+    ClassProject::Reachable comp(3);
+    
+    comp.init();
+    
+    auto states = comp.getStates();
+    std::vector<BDD_ID> functions;
+
+    auto s0 = states.at(0);
+    auto s1 = states.at(1);
+    auto s2 = states.at(2);
+
+
+    functions.push_back(comp.True());//s0'
+    functions.push_back(comp.False()); //s1'
+    functions.push_back(comp.True()); //s2'
+    //Add transition functions
+    comp.setDelta(functions);
+    //Add init state
+    comp.setInitState({true,true, true});
+
+    comp.compute_reachable_states();
+
+    //FSM has only transition to (101); init-state=(1,1,1)
+    ASSERT_TRUE(comp.is_reachable({true,false, true}));
+    ASSERT_TRUE(comp.is_reachable({true,true, true}));
+    ASSERT_FALSE(comp.is_reachable({false,false, false}));
+    ASSERT_FALSE(comp.is_reachable({true,false, false}));
+    ASSERT_FALSE(comp.is_reachable({false,false, true}));
+    ASSERT_FALSE(comp.is_reachable({false,false, false}));
+}
+
+
+
+
+
+TEST(managerTest, FSM3Test) {
+    ClassProject::Reachable comp(4);
+    
+    comp.init();
+    
+    auto states = comp.getStates();
+    std::vector<BDD_ID> functions;
+
+    auto s0 = states.at(0);
+    auto s1 = states.at(1);
+    auto s2 = states.at(2);
+    auto s3 = states.at(3);
+
+
+    functions.push_back(s0); //s0'
+    functions.push_back(comp.or2(s1, s0)); //s1'
+    functions.push_back(comp.or2(s1, s2)); //s2'
+    functions.push_back(comp.or2(s2, s3)); //s3'
+
+    //Add transition functions
+    comp.setDelta(functions);
+    //Add init state
+    comp.setInitState({true,false, false, false});
+
+    comp.compute_reachable_states();
+
+    //FSM has only transition to (101); init-state=(1,1,1)
+    ASSERT_TRUE(comp.is_reachable({true,false, false, false}));
+    ASSERT_TRUE(comp.is_reachable({true,true, false, false}));
+    ASSERT_TRUE(comp.is_reachable({true,true, true, false}));
+    ASSERT_TRUE(comp.is_reachable({true,true, true, true}));
+
+
+    ASSERT_FALSE(comp.is_reachable({false, false, false, false}));
+    ASSERT_FALSE(comp.is_reachable({true, false, true, false}));
+    ASSERT_FALSE(comp.is_reachable({false, true, false, false}));
+    ASSERT_FALSE(comp.is_reachable({false, false, true, false}));
+    ASSERT_FALSE(comp.is_reachable({false, false, false, true}));
+    ASSERT_FALSE(comp.is_reachable({false, true, true, false}));
+    ASSERT_FALSE(comp.is_reachable({false, true, true, true}));
 
 }
 
+
+
+TEST(managerTest, FSM4Test) {
+    ClassProject::Reachable comp(3);
+    
+    comp.init();
+    
+    auto states = comp.getStates();
+    std::vector<BDD_ID> functions;
+
+    auto s0 = states.at(0);
+    auto s1 = states.at(1);
+    auto s2 = states.at(2);
+
+
+    auto x1 = comp.createInputVariable("x1");
+    auto x2 = comp.createInputVariable("x2");
+    auto x3 = comp.createInputVariable("x3");
+
+    functions.push_back(x1); //s0' = x1
+    functions.push_back(x2); //s1' = x2 
+    functions.push_back(x3); //s2' = x3
+
+    //Add transition functions
+    comp.setDelta(functions);
+    //Add init state
+    comp.setInitState({true,false, false});
+
+    comp.compute_reachable_states();
+
+    //FSM has only transition to (101); init-state=(1,1,1)
+    ASSERT_TRUE(comp.is_reachable({true,true, true}));
+    ASSERT_TRUE(comp.is_reachable({false,true, true}));
+    ASSERT_TRUE(comp.is_reachable({true,false, true}));
+    ASSERT_TRUE(comp.is_reachable({false,false, true}));
+    ASSERT_TRUE(comp.is_reachable({true,true, false}));
+    ASSERT_TRUE(comp.is_reachable({false,true, false}));
+    ASSERT_TRUE(comp.is_reachable({true,false, false}));
+    ASSERT_TRUE(comp.is_reachable({false,false, false}));
+
+
+}
+
+
+
+
+TEST(managerTest, FSM5Test) {
+    ClassProject::Reachable comp(4);
+    
+    comp.init();
+    
+    auto states = comp.getStates();
+    std::vector<BDD_ID> functions;
+
+    auto s0 = states.at(0);
+    auto s1 = states.at(1);
+    auto s2 = states.at(2);
+    auto s3 = states.at(3);
+
+
+    functions.push_back(s3); //s0' = x1
+    functions.push_back(s0); //s1' = x2 
+    functions.push_back(s1); //s2' = x3
+    functions.push_back(s2); //s2' = x3
+
+
+    //Add transition functions
+    comp.setDelta(functions);
+    //Add init state
+    comp.setInitState({true,false, false, true});
+
+    comp.compute_reachable_states();
+
+    //FSM has only transition to (101); init-state=(1,1,1)
+    ASSERT_TRUE(comp.is_reachable({true,false, false, true}));
+    ASSERT_TRUE(comp.is_reachable({true, true, false, false}));
+    ASSERT_TRUE(comp.is_reachable({false,true, true, false}));
+    ASSERT_TRUE(comp.is_reachable({false,false, true, true}));
+
+
+    ASSERT_FALSE(comp.is_reachable({false,false, false, false}));
+    ASSERT_FALSE(comp.is_reachable({true, true, true, true}));
+    ASSERT_FALSE(comp.is_reachable({false,true, false, false}));
+    ASSERT_FALSE(comp.is_reachable({true,false, true, true}));
+
+
+
+}
+
+
+
+TEST(managerTest, privateFunctionsTest) {
+    ClassProject::Reachable comp(4);
+    
+    comp.init();
+    
+    auto states = comp.getStates();
+    EXPECT_EQ(comp.getStates().size(), 4);
+
+    states.push_back(10);
+    states.push_back(10);
+    states.push_back(10);
+    states.push_back(10);
+    states.push_back(10);
+
+
+    EXPECT_EQ(comp.getStates().size(), 4);
+
+}
 
 
 #endif //VDSPROJECT_TESTS_H

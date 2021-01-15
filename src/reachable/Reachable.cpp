@@ -69,8 +69,8 @@ namespace ClassProject {
 
     BDD_ID Reachable::compute_reachable_states(){
         //output is BDD_ID of a boolean function that represents the set of reachable-states
-
         //compute transition-relation
+        
         for (int i =0; i < getStateSize(); i++) {
             //BDD_ID x = or2(and2(nextStates[i], stateTransitions[i]), and2(neg(nextStates[i]), neg(stateTransitions[i])));
             BDD_ID x = xnor2(nextStates[i], stateTransitions[i]);
@@ -101,10 +101,10 @@ namespace ClassProject {
             }
 
 
-            //existential quantifier: input_variable
-            //for (int i = 0 ; i < getStates(); i++){
-            //    tmp = or2(coFactorTrue(tmp, states[i]), coFactorFalse(tmp, states[i]))
-            //}
+            //existential quantifier: input_variables
+            for (int i = 0 ; i < inputVariables.size(); i++){
+                tmp = or2(coFactorTrue(tmp, inputVariables[i]), coFactorFalse(tmp, inputVariables[i]));
+            }
 
             img = tmp; //img_function depens on next_state yet!
             
@@ -124,7 +124,6 @@ namespace ClassProject {
             //now img function depens on the stateVariables!
 
             characteristicFunctionIteration = or2(characteristicFunction, img); //epxand the set of reachableStates
-
             b = (characteristicFunction != characteristicFunctionIteration); // loop ends when equality holds.
         }
 
@@ -158,5 +157,14 @@ namespace ClassProject {
     BDD_ID Reachable::getInitalStateCharacteristic(){
         return initialStateCharacteristicFunction;
     }
+
+
+
+    BDD_ID Reachable::createInputVariable(const std::string &label){
+        BDD_ID id = createVar(label);
+        inputVariables.push_back(id);
+        return id;
+    }
+
 
 }
