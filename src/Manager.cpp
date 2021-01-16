@@ -17,20 +17,6 @@ namespace ClassProject {
         e = z;
     }
 
-
-    Unique_identifier::Unique_identifier(){
-        id_low=-1;
-        id_high=-1;
-    }
-
-
-    Unique_table_entry::Unique_table_entry(){
-        Unique_identifier identifier;
-        id=-1;
-        is_variable=false;
-    }
-
-
     Manager::Manager(){
         //here initialize data-structure
         latest_id_value = LATEST_VALUE_INIT;
@@ -82,6 +68,14 @@ namespace ClassProject {
     BDD_ID Manager::ite(const BDD_ID i, const BDD_ID t, const BDD_ID e){
         //ite(i,t,e) = i*t + not(i)*e
         //case i) all 3 values are boolean then just evaluate i*t + not(i)*e
+        if(i == 1) return t;
+        if(i == 0) return e;
+
+        if (t==e) return t;
+        if(t == 1 && e== 0) return i;
+
+
+        //case i) all 3 values are boolean then just evaluate i*t + not(i)*e
         if((i == 0 || i == 1) && (t == 0 || t == 1) && (e == 0 || e == 1)){
             bool i_b = (bool)i;
             bool t_b = (bool)t;
@@ -91,17 +85,9 @@ namespace ClassProject {
             ite_evaluation = i&&t || (!i)&&e;
             return (BDD_ID)ite_evaluation;
         }
-
-        if(i == 1) return t;
-        if(i == 0) return e;
-
-        if (t==e) return t;
-
-        if(t == 1 && e== 0) return i;
         //end of terminal cases
 
         //check for entry in computed-table
-        // if computed_table(i, t, e).has_entry() return computed_table_entry
         if( hashing_computed_table.find(ite_id(i, t, e)) != hashing_computed_table.end()) return hashing_computed_table[ite_id(i,t,e)];
 
 
@@ -111,35 +97,35 @@ namespace ClassProject {
         int top_var_id_order = INT_MAX;
 
         Unique_identifier identifier_i = unique_table.at(i).identifier;
+        Unique_identifier identifier_t = unique_table.at(t).identifier;
+        Unique_identifier identifier_e = unique_table.at(e).identifier;
+
+
         if (!(i == 0 || i == 1)){
             top_var_priority = identifier_i.top_var;
-            top_var_id_order = variable_to_order_map[top_var_priority];
+            top_var_id_order = variable_to_id_map[top_var_priority];    //the id of the variable equals the priority of the variable
         }
         
-
-        Unique_identifier identifier_t = unique_table.at(t).identifier;
         if (!(t == 0 || t == 1)) {
-            if(variable_to_order_map[identifier_t.top_var] < top_var_id_order){
+            BDD_ID t_var_id = variable_to_id_map[identifier_t.top_var]; 
+            if(t_var_id < top_var_id_order){
                 top_var_priority = identifier_t.top_var;
-                top_var_id_order = variable_to_order_map[top_var_priority];
+                top_var_id_order = t_var_id;    //the id of the variable equals the priority of the variable
             }
         }
 
-
-        Unique_identifier identifier_e = unique_table.at(e).identifier;
         if (!(e == 0 || e == 1)){
-            if(variable_to_order_map[identifier_e.top_var] < top_var_id_order){
+            BDD_ID e_var_id = variable_to_id_map[identifier_e.top_var];
+            if(e_var_id < top_var_id_order){
                 top_var_priority = identifier_e.top_var;
-                top_var_id_order = variable_to_order_map[top_var_priority];
+                top_var_id_order = e_var_id;    //the id of the variable equals the priority of the variable
             }
         }
         
-
-        int top_var_priority_id = variable_to_id_map[top_var_priority];
 
         BDD_ID i_high, i_low, t_high, t_low, e_high, e_low;
 
-        if (variable_to_id_map[identifier_i.top_var] == top_var_priority_id){
+        if (identifier_i.top_var == top_var_priority){
             i_high = identifier_i.id_high;
             i_low = identifier_i.id_low;
         } else{
@@ -147,7 +133,7 @@ namespace ClassProject {
             i_low =  i;
         }
 
-        if (variable_to_id_map[identifier_t.top_var] == top_var_priority_id){
+        if (identifier_t.top_var == top_var_priority){
             t_high = identifier_t.id_high;
             t_low = identifier_t.id_low;
         } else{
@@ -155,7 +141,7 @@ namespace ClassProject {
             t_low = t;
         }
 
-        if (variable_to_id_map[identifier_e.top_var] == top_var_priority_id){
+        if (identifier_e.top_var == top_var_priority){
             e_high = identifier_e.id_high;
             e_low  = identifier_e.id_low;
         } else{
@@ -164,31 +150,24 @@ namespace ClassProject {
         }
 
   
-
-        BDD_ID recursion_high, recursion_low;
-
-        recursion_high = ite(i_high, t_high, e_high);
-        recursion_low = ite(i_low, t_low, e_low);
+        BDD_ID recursion_high = ite(i_high, t_high, e_high);
+        BDD_ID recursion_low = ite(i_low, t_low, e_low);
 
         if (recursion_high == recursion_low) return recursion_high;
 
 
-        Unique_identifier identifier;
+        Unique_identifier identifier_result;
 
         //add result to unique_table, if its not already in table
-        identifier.top_var = top_var_priority;
-        identifier.id_high = recursion_high;
-        identifier.id_low = recursion_low;
+        identifier_result.top_var = top_var_priority;
+        identifier_result.id_high = recursion_high;
+        identifier_result.id_low = recursion_low;
 
         //check for duplicates before adding
-        auto it = unique_table_reverse.find(identifier);
-        if (it != unique_table_reverse.end()) return unique_table_reverse[identifier];
+        auto it = unique_table_reverse.find(identifier_result);
+        if (it != unique_table_reverse.end()) return unique_table_reverse[identifier_result];
         
-        //std::pair<bool, BDD_ID> h;
-        //h = check_if_unique_identifier_in_table(identifier);
-        //if (h.first) return h.second; //identifier already return the ID that corresponds to this entry
-
-        int bdd_id = add_table_entry(identifier, "label"); //improve label
+        int bdd_id = add_table_entry(identifier_result, "label"); //improve label
         hashing_computed_table[ite_id(i, t, e)] = bdd_id; //add entry in computed_table_entry(i, t, e);
 
         return bdd_id;
@@ -222,8 +201,6 @@ namespace ClassProject {
             //variable already exists just return the id of this variable
             return variable_to_id_map[label];
         }
-  
-
         //construct new Unique_table_entry and add to unique_table
         latest_id_value++;
         
@@ -239,11 +216,11 @@ namespace ClassProject {
         new_entry.identifier = identifier;
         new_entry.is_variable = true;
 
-        variable_to_order_map[label] = latest_id_value;
         variable_to_id_map[label] = latest_id_value;
         unique_table[latest_id_value] = new_entry;  //add new variable entry to the table
         unique_table_reverse[identifier] = latest_id_value;
 
+        if (latest_id_value == 0) std::cout << "error not enough overflow of BDD_ID integer in table" << std::endl;
         return latest_id_value;
     }
 
@@ -258,6 +235,7 @@ namespace ClassProject {
 
     BDD_ID Manager::or2(const BDD_ID a, const BDD_ID b){
         return ite(a, ID_TRUE, b);
+        //return neg(and2(neg(a), neg(b)));
     }
 
     BDD_ID Manager::xor2(const BDD_ID a, const BDD_ID b){
@@ -281,6 +259,7 @@ namespace ClassProject {
 
     BDD_ID Manager::nor2(const BDD_ID a, const BDD_ID b){
         return neg(or2(a,b));
+        //return and2(neg(a), neg(b));
     }
 
 
@@ -335,10 +314,6 @@ namespace ClassProject {
         auto it = unique_table_reverse.find(identifier);
         if (it != unique_table_reverse.end()) return unique_table_reverse[identifier];
 
-        //std::pair<bool, BDD_ID> h;
-        //h = check_if_unique_identifier_in_table(identifier);
-        //if (h.first) return h.second; //identifier already return the ID that corresponds to this entry
-
         return add_table_entry(identifier, "label"); //improve label
     }
 
@@ -377,7 +352,6 @@ namespace ClassProject {
     BDD_ID Manager::add_table_entry(Unique_identifier identifier, std::string label){
         latest_id_value++;
 
-
         Unique_table_entry new_entry;
         new_entry.id =latest_id_value;
         new_entry.label = label;
@@ -386,7 +360,7 @@ namespace ClassProject {
 
         unique_table[latest_id_value] = new_entry;  //add new variable entry to the table
         unique_table_reverse[identifier] = latest_id_value;    
-
+        if (latest_id_value == 0) std::cout << "error not enough overflow of BDD_ID integer in table" << std::endl;
         return latest_id_value;
     }
 }

@@ -336,6 +336,59 @@ TEST(ManagerTest, OrTest) {
 
 
 
+TEST(ManagerTest, Or2Test) {
+    ClassProject::Manager manager;
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+
+    //or(a,b) = ite(a, 1, b)
+    ClassProject::BDD_ID result_id = manager.or2(id_a, id_b);
+    ClassProject::BDD_ID result_id_or_alternative = manager.neg(manager.and2(manager.neg(id_a), manager.neg(id_b)));
+
+
+    EXPECT_EQ(result_id, result_id_or_alternative);
+
+
+    ClassProject::BDD_ID result_id_or_alternative2 = manager.nand2(manager.neg(id_a), manager.neg(id_b));
+    EXPECT_EQ(result_id_or_alternative2, result_id);
+
+}
+
+
+
+
+
+TEST(ManagerTest, OrMultipleInputTest) {
+    ClassProject::Manager manager;
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_d = manager.createVar("d");
+    ClassProject::BDD_ID id_e = manager.createVar("e");
+    ClassProject::BDD_ID id_f = manager.createVar("f");
+    ClassProject::BDD_ID id_g = manager.createVar("g");
+
+    //or(a,b) = ite(a, 1, b)
+    ClassProject::BDD_ID result_id = manager.or2(manager.or2(manager.or2(manager.or2(manager.or2(manager.or2(id_a, id_b), id_c), id_d), id_e), id_f), id_g);
+
+    EXPECT_EQ(manager.coFactorTrue(result_id), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(result_id))))))), manager.False());
+
+    EXPECT_EQ(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorTrue(manager.coFactorFalse(result_id))))))), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorTrue(manager.coFactorFalse(manager.coFactorFalse(result_id))))))), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorTrue(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(result_id))))))), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorTrue(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(result_id))))))), manager.True());
+    EXPECT_EQ(manager.coFactorFalse(manager.coFactorTrue(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(result_id))))))), manager.True());
+    EXPECT_EQ(manager.coFactorTrue(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(result_id))))))), manager.True());
+    EXPECT_EQ(manager.coFactorTrue(manager.coFactorTrue(manager.coFactorFalse(manager.coFactorTrue(manager.coFactorFalse(manager.coFactorFalse(manager.coFactorFalse(result_id))))))), manager.True());
+
+
+}
+
+
+
 TEST(ManagerTest, AndTest) {
     ClassProject::Manager manager;
 
@@ -519,7 +572,6 @@ TEST(ManagerTest, NorTest) {
 
     ClassProject::BDD_ID id_not_b = manager.neg(id_b);
     ClassProject::BDD_ID id_result = manager.nor2(id_a,id_b); //nor(a,b) = not(or(a,b))
-    EXPECT_EQ(manager.uniqueTableSize(), 7);
 
 
     EXPECT_EQ(manager.getTopVarName(id_result), "a");
@@ -538,6 +590,25 @@ TEST(ManagerTest, NorTest) {
     id_result = manager.nor2(id_a, 1); //nor(a,1) = not(a + 1) = not(1) = 0
     EXPECT_EQ(id_result, manager.False());
 }
+
+
+TEST(ManagerTest, Nor2Test) {
+    ClassProject::Manager manager;
+
+
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+
+    ClassProject::BDD_ID id_result = manager.nor2(id_a,id_b); //nor(a,b) = not(or(a,b))
+
+
+    ClassProject::BDD_ID id_result2 = manager.and2(manager.neg(id_a), manager.neg(id_b)); 
+    EXPECT_EQ(id_result, id_result);
+}
+
+
+
+
 
 
 TEST(ManagerTest, XorTest) {

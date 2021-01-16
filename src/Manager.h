@@ -45,7 +45,7 @@ namespace ClassProject {
         size_t operator()(const ite_id& key) const
         { 
             return key.i * 3 + key.t * 5 + key.e * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
-            //return pow(3,key.i) *pow(5,key.t) *pow(7, key.e); //just used first noob function that came to my mind; can or rather sould be improved!!!!
+            //return key.i * 2 + key.t * 4 + key.e * 8; //just used first noob function that came to my mind; can or rather sould be improved!!!!
 
         } 
     }; 
@@ -54,7 +54,7 @@ namespace ClassProject {
 
     class Unique_identifier {
         public:
-            Unique_identifier();        //constructor
+            Unique_identifier() {};        //constructor
 
             std::string top_var;
             BDD_ID id_low;
@@ -81,7 +81,8 @@ namespace ClassProject {
     public: 
         size_t operator()(const Unique_identifier& key) const
         { 
-            return key.id_low * 3 + key.id_high * 5 + key.top_var.size() * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
+            //return key.id_low * 3 + key.id_high * 5 + key.top_var.size() * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
+            return key.id_low + key.id_high * 5 + key.top_var.size() * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
         } 
     }; 
 
@@ -90,7 +91,7 @@ namespace ClassProject {
     //end of classes for absract-syntax-tree handling
     class Unique_table_entry {
         public:
-            Unique_table_entry();   //constructor
+            Unique_table_entry() {};   //constructor
 
 
             Unique_identifier identifier;
@@ -158,8 +159,7 @@ namespace ClassProject {
         std::unordered_map<ite_id, BDD_ID, MyHashFunction> hashing_computed_table;
 
 
-        std::map<std::string, BDD_ID> variable_to_id_map;
-        std::map<std::string, int> variable_to_order_map;   //start with a simple : variable first added has highest order
+        std::unordered_map<std::string, BDD_ID> variable_to_id_map;
 
         BDD_ID add_table_entry(Unique_identifier identifier, std::string label);
     };
