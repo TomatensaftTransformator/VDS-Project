@@ -38,7 +38,7 @@ namespace ClassProject {
 
         auto true_entrie_pair = std::make_pair(ID_TRUE, TRUE_entry);
         unique_table.insert (true_entrie_pair);
-        variable_to_id_map["1"] = ID_TRUE;
+        //variable_to_id_map["1"] = ID_TRUE;
         unique_table_reverse[TRUE_identifier] = ID_TRUE;
         //unique_table[ID_TRUE] = TRUE_entry;  //add new variable entry to the table
 
@@ -61,7 +61,7 @@ namespace ClassProject {
         auto false_entrie_pair = std::make_pair(ID_FALSE, FALSE_entry);
         unique_table.insert (false_entrie_pair);
         unique_table_reverse[FALSE_identifier] = ID_FALSE;    
-        variable_to_id_map["0"] = ID_FALSE;
+        //variable_to_id_map["0"] = ID_FALSE;
     }
 
 

@@ -30,10 +30,8 @@ TEST(InitializeTest, true_entry) {
 
 
     EXPECT_EQ(manager.True(), 1);
-    EXPECT_EQ(manager.topVar(manager.True()), 1);
     EXPECT_EQ(manager.coFactorTrue(manager.True()), 1);
     EXPECT_EQ(manager.coFactorFalse(manager.True()), 1);
-    EXPECT_EQ(manager.getTopVarName(manager.True()), "1");
 }
 
 
@@ -42,10 +40,8 @@ TEST(InitializeTest, false_entry) {
 
 
     EXPECT_EQ(manager.False(), 0);
-    EXPECT_EQ(manager.topVar(manager.False()), 0);
     EXPECT_EQ(manager.coFactorTrue(manager.False()), 0);
     EXPECT_EQ(manager.coFactorFalse(manager.False()), 0);
-    EXPECT_EQ(manager.getTopVarName(manager.False()), "0");
 }
 
 
@@ -130,12 +126,6 @@ TEST(ManagerTest, topVarTest) {
 
     ClassProject::BDD_ID id_and2 = manager.and2(id_or, id_and);
     EXPECT_EQ(manager.topVar(id_and2), id_a);
-
-
-
-    EXPECT_EQ(manager.topVar(manager.True()), manager.True());
-
-
 }
 
 TEST(ManagerTest, getTopVarNameTest){
@@ -148,11 +138,6 @@ TEST(ManagerTest, getTopVarNameTest){
     EXPECT_EQ("a", manager.getTopVarName(id_a));
 
     EXPECT_EQ("b", manager.getTopVarName(id_b));
-
-
-    EXPECT_EQ("1", manager.getTopVarName(manager.True()));
-    EXPECT_EQ("0", manager.getTopVarName(manager.False()));
-
 
     ClassProject::BDD_ID res = manager.and2(id_a, id_b);
     EXPECT_EQ("a", manager.getTopVarName(res));
@@ -296,6 +281,18 @@ TEST(ManagerTest, createVarTest) {
     EXPECT_EQ(manager.isVariable(id_empty_string), true);
 }
 
+
+
+
+
+TEST(ManagerTest, createVar2Test) {
+    ClassProject::Manager manager;
+
+    ClassProject::BDD_ID id_1 = manager.createVar("1");
+    
+    
+    EXPECT_EQ(id_1, 2);
+}
 
 
 
@@ -765,6 +762,114 @@ TEST(ManagerTest, negXorTest) {
 
 }
 
+
+
+
+
+
+TEST(ManagerTest, DistributiveLawTest) {
+    ClassProject::Manager manager;
+
+
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+
+
+    ClassProject::BDD_ID id_res1 = manager.and2(id_a, manager.or2(id_b, id_c));
+    ClassProject::BDD_ID id_res2 = manager.or2(manager.and2(id_a, id_b), manager.and2(id_a, id_c));
+    EXPECT_EQ(id_res1, id_res2);
+
+
+
+
+    ClassProject::BDD_ID id_res3 = manager.or2(id_a, manager.and2(id_b, id_c));
+    ClassProject::BDD_ID id_res4 = manager.and2(manager.or2(id_a, id_b), manager.or2(id_a, id_c));
+    EXPECT_EQ(id_res3, id_res4);
+
+
+
+}
+
+
+
+TEST(ManagerTest, AssociativeLawTest) {
+    ClassProject::Manager manager;
+
+
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+
+
+    ClassProject::BDD_ID id_res1 = manager.and2(id_a, manager.and2(id_b, id_c));
+    ClassProject::BDD_ID id_res2 = manager.and2(manager.and2(id_a, id_b), id_c);
+    EXPECT_EQ(id_res1, id_res2);
+
+
+
+    ClassProject::BDD_ID id_res1_or = manager.or2(id_a, manager.or2(id_b, id_c));
+    ClassProject::BDD_ID id_res2_or = manager.or2(manager.or2(id_a, id_b), id_c);
+    EXPECT_EQ(id_res1_or, id_res2_or);
+}
+
+
+
+
+TEST(ManagerTest, ComplementationLawTest) {
+    ClassProject::Manager manager;
+
+
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+
+
+    EXPECT_EQ(manager.or2(manager.neg(id_a), id_a), manager.True());
+    EXPECT_EQ(manager.and2(manager.neg(id_a), id_a), manager.False());
+
+
+
+
+    ClassProject::BDD_ID id_res1 = manager.and2(id_a, manager.and2(id_b, id_c));
+    ClassProject::BDD_ID id_res2 = manager.and2(manager.and2(id_a, id_b), id_c);
+    EXPECT_EQ(id_res1, id_res2);
+
+
+
+    ClassProject::BDD_ID id_res1_or = manager.or2(id_a, manager.or2(id_b, id_c));
+    ClassProject::BDD_ID id_res2_or = manager.or2(manager.or2(id_a, id_b), id_c);
+    EXPECT_EQ(id_res1_or, id_res2_or);
+
+
+    EXPECT_EQ(manager.or2(id_res2, manager.neg(id_res2)), manager.True());
+    EXPECT_EQ(manager.and2(id_res2, manager.neg(id_res2)), manager.False());
+
+
+}
+
+
+
+
+
+
+
+TEST(ManagerTest, DeMorganRuleTest) {
+    ClassProject::Manager manager;
+
+
+    ClassProject::BDD_ID id_c = manager.createVar("c");
+    ClassProject::BDD_ID id_b = manager.createVar("b");
+    ClassProject::BDD_ID id_a = manager.createVar("a");
+
+
+    EXPECT_EQ(manager.or2(manager.neg(id_a), id_a), manager.True());
+    EXPECT_EQ(manager.and2(manager.neg(id_a), id_a), manager.False());
+
+    EXPECT_EQ(manager.nand2(id_a, id_c), manager.or2(manager.neg(id_a), manager.neg(id_c)));
+
+
+}
 
 
 
@@ -1453,13 +1558,9 @@ TEST(ManagerTest, DuplicateEntryTest) {
     ClassProject::BDD_ID id_a = manager.createVar("a");
     ClassProject::BDD_ID id_b = manager.createVar("b");
     ClassProject::BDD_ID id_b2 = manager.createVar("b");
-    ClassProject::BDD_ID id_one = manager.createVar("1");
-    ClassProject::BDD_ID id_zero = manager.createVar("0");
 
 
 
-    EXPECT_EQ(manager.False(), id_zero);
-    EXPECT_EQ(manager.True(), id_one);
     EXPECT_EQ(id_b, id_b2);
 
     manager.and2(id_a, id_b);
