@@ -199,6 +199,7 @@ namespace ClassProject {
         //first check variable already exists to avoid duplicate variable
         if(variable_to_id_map.find(label) != variable_to_id_map.end()){
             //variable already exists just return the id of this variable
+            std::cout << "New variable already exists!" << std::endl;
             return variable_to_id_map[label];
         }
         //construct new Unique_table_entry and add to unique_table
