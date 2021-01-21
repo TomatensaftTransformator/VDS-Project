@@ -88,7 +88,8 @@ namespace ClassProject {
         //end of terminal cases
 
         //check for entry in computed-table
-        if( hashing_computed_table.find(ite_id(i, t, e)) != hashing_computed_table.end()) return hashing_computed_table[ite_id(i,t,e)];
+        const auto ite_key = ite_id(i, t, e);
+        if( hashing_computed_table.find(ite_key) != hashing_computed_table.end()) return hashing_computed_table[ite_key];
 
 
 
@@ -153,7 +154,10 @@ namespace ClassProject {
         BDD_ID recursion_high = ite(i_high, t_high, e_high);
         BDD_ID recursion_low = ite(i_low, t_low, e_low);
 
-        if (recursion_high == recursion_low) return recursion_high;
+        if (recursion_high == recursion_low){
+            hashing_computed_table[ite_key] = recursion_high;
+            return recursion_high;
+        }
 
 
         Unique_identifier identifier_result;
@@ -165,10 +169,14 @@ namespace ClassProject {
 
         //check for duplicates before adding
         auto it = unique_table_reverse.find(identifier_result);
-        if (it != unique_table_reverse.end()) return unique_table_reverse[identifier_result];
+        if (it != unique_table_reverse.end()){
+            BDD_ID id = unique_table_reverse[identifier_result]; 
+            hashing_computed_table[ite_key] = id;
+            return id;
+        }
         
         int bdd_id = add_table_entry(identifier_result, "label"); //improve label
-        hashing_computed_table[ite_id(i, t, e)] = bdd_id; //add entry in computed_table_entry(i, t, e);
+        hashing_computed_table[ite_key] = bdd_id; //add entry in computed_table_entry(i, t, e);
 
         return bdd_id;
     }
