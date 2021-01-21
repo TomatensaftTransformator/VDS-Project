@@ -49,13 +49,27 @@ namespace ClassProject {
             a = (a + b)*(a + b + 1)/2 + b;
             b = key.e;
             return (a + b)*(a + b + 1)/2 + b;
-                
+
             //return key.i * 3 + key.t * 5 + key.e * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
             //return key.i * 2 + key.t * 4 + key.e * 8; //just used first noob function that came to my mind; can or rather sould be improved!!!!
 
         } 
     }; 
+    class MyHashFunctionOld {
+    public:
+        size_t operator()(const ite_id& key) const
+        {
+            return key.i * 3 + key.t * 5 + key.e * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
+            //return key.i * 2 + key.t * 4 + key.e * 8; //just used first noob function that came to my mind; can or rather sould be improved!!!!
+        }
 
+
+    };
+    class MyHashMapT {
+    public:
+
+        std::unordered_map<ite_id, BDD_ID, MyHashFunction> test_map;
+    };
 
 
     class Unique_identifier {

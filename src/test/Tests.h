@@ -1586,7 +1586,52 @@ TEST(ManagerTest, DuplicateEntryTest) {
 
 }
 
+TEST(ManagerTest, HashMappingTime) {
+    ClassProject::MyHashMapT t_map;
 
+    ClassProject:: ite_id new_entry(0,0,0);
+    int i_max = 60;
+    int t_max = 60;
+    int e_max = 60;
+    ClassProject:: BDD_ID cnt = 0;
+    for(int i(0); i < i_max; i++)
+    {
+        for(int t(0); t < t_max; t++)
+        {
+            for(int e(0); e < i_max; e++)
+            {
+
+                new_entry.i = i;
+                new_entry.t = t;
+                new_entry.e = e;
+
+                t_map.test_map[new_entry] = cnt;  //add new variable entry to the table
+                cnt++;
+            }
+        }
+    }
+
+    for(int i(0); i < i_max; i++)
+    {
+        for(int t(0); t < t_max; t++)
+        {
+            for(int e(0); e < i_max; e++)
+            {
+
+                new_entry.i = i;
+                new_entry.t = t;
+                new_entry.e = e;
+
+                cnt = t_map.test_map[new_entry];  //add new variable entry to the table
+
+            }
+        }
+    }
+
+
+
+
+}
 
 
 
