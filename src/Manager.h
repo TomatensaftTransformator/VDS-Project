@@ -46,9 +46,9 @@ namespace ClassProject {
         {
             size_t a = key.i;
             size_t b = key.t;
-            a = (a + b)*(a + b + 1)/2 + b;
+            a = (a << 12) + b;
             b = key.e;
-            return (a + b)*(a + b + 1)/2 + b;
+            return (a << 12) + b;
         } 
     }; 
 
@@ -92,9 +92,9 @@ namespace ClassProject {
             
             size_t a = key.id_low;
             size_t b = key.id_high;
-            a = (a + b)*(a + b + 1)/2 + b;
+            a = (a << 12) + b;
             b = key.top_var.size();
-            return (a + b)*(a + b + 1)/2 + b;
+            return (a << 12) + b;
         } 
     }; 
 
