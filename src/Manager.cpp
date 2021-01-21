@@ -36,11 +36,8 @@ namespace ClassProject {
         TRUE_entry.is_variable = false;
 
 
-        auto true_entrie_pair = std::make_pair(ID_TRUE, TRUE_entry);
-        unique_table.insert (true_entrie_pair);
-        //variable_to_id_map["1"] = ID_TRUE;
+        unique_table[ID_TRUE] = TRUE_entry;
         unique_table_reverse[TRUE_identifier] = ID_TRUE;
-        //unique_table[ID_TRUE] = TRUE_entry;  //add new variable entry to the table
 
 
         //add entry for FALSE into unique table
@@ -56,12 +53,8 @@ namespace ClassProject {
         FALSE_entry.identifier = FALSE_identifier;
         FALSE_entry.is_variable = false;
 
-        //unique_table[ID_FALSE] = FALSE_entry;  //add new variable entry to the table
-
-        auto false_entrie_pair = std::make_pair(ID_FALSE, FALSE_entry);
-        unique_table.insert (false_entrie_pair);
+        unique_table[ID_FALSE] = FALSE_entry;
         unique_table_reverse[FALSE_identifier] = ID_FALSE;    
-        //variable_to_id_map["0"] = ID_FALSE;
     }
 
 
@@ -244,17 +237,10 @@ namespace ClassProject {
 
     BDD_ID Manager::or2(const BDD_ID a, const BDD_ID b){
         return ite(a, ID_TRUE, b);
-        //return neg(and2(neg(a), neg(b)));
     }
 
     BDD_ID Manager::xor2(const BDD_ID a, const BDD_ID b){
-        //xor(a,b) = a*not(b) + not(a)*b
-        //BDD_ID not_a = neg(a);
-        //BDD_ID not_b =neg(b);
-        //BDD_ID and_case_1 =and2(a, not_b);
-        //BDD_ID and_case_2 =and2(not_a, b);
         return ite(ite(b, ID_FALSE, a), ID_TRUE, ite(a, ID_FALSE, b));
-        //return or2(and_case_1, and_case_2);
     }
 
     BDD_ID Manager::neg(const BDD_ID a){
@@ -268,7 +254,6 @@ namespace ClassProject {
 
     BDD_ID Manager::nor2(const BDD_ID a, const BDD_ID b){
         return neg(or2(a,b));
-        //return and2(neg(a), neg(b));
     }
 
 
@@ -315,7 +300,6 @@ namespace ClassProject {
 
         if (recursion_high == recursion_low) return recursion_high;
 
-        //add result to unique_table, if its not already in table
         identifier.id_high = recursion_high;
         identifier.id_low = recursion_low;
 
@@ -328,8 +312,6 @@ namespace ClassProject {
 
 
     void Manager::findNodes(const BDD_ID &root, std::set<BDD_ID> &nodes_of_root){    //returns the set of BDD nodes whih are reachable from the BDD node root(including itself)
-        //traverse through "tree" starting at root.
-        //go down until
         nodes_of_root.insert(root);
         if (root == ID_FALSE || root == ID_TRUE) return;
         Unique_table_entry node = unique_table.at(root);
@@ -367,7 +349,7 @@ namespace ClassProject {
         new_entry.identifier = identifier;
         new_entry.is_variable = false;
 
-        unique_table[latest_id_value] = new_entry;  //add new variable entry to the table
+        unique_table[latest_id_value] = new_entry;
         unique_table_reverse[identifier] = latest_id_value;    
         if (latest_id_value == 0) std::cout << "error not enough overflow of BDD_ID integer in table" << std::endl;
         return latest_id_value;
