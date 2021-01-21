@@ -43,8 +43,14 @@ namespace ClassProject {
     class MyHashFunction { 
     public: 
         size_t operator()(const ite_id& key) const
-        { 
-            return key.i * 3 + key.t * 5 + key.e * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
+        {
+            size_t a = key.i;
+            size_t b = key.t;
+            a = (a + b)*(a + b + 1) + b;
+            b = key.e;
+            return (a + b)*(a + b + 1) + b;
+                
+            //return key.i * 3 + key.t * 5 + key.e * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
             //return key.i * 2 + key.t * 4 + key.e * 8; //just used first noob function that came to my mind; can or rather sould be improved!!!!
 
         } 
@@ -81,8 +87,14 @@ namespace ClassProject {
     public: 
         size_t operator()(const Unique_identifier& key) const
         { 
+            
+            size_t a = key.id_low;
+            size_t b = key.id_high;
+            a = (a + b)*(a + b + 1) + b;
+            b = key.top_var.size();
+            return (a + b)*(a + b + 1) + b;
             //return key.id_low * 3 + key.id_high * 5 + key.top_var.size() * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
-            return key.id_low + key.id_high * 5 + key.top_var.size() * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
+            //return key.id_low + key.id_high * 5 + key.top_var.size() * 7; //just used first noob function that came to my mind; can or rather sould be improved!!!!
         } 
     }; 
 
