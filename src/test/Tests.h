@@ -1585,7 +1585,7 @@ TEST(ManagerTest, DuplicateEntryTest) {
     EXPECT_EQ(s, manager.uniqueTableSize());
 
 }
-
+/*
 TEST(ManagerTest, HashMappingTime) {
     ClassProject::MyHashMapT t_map;
 
@@ -1633,7 +1633,7 @@ TEST(ManagerTest, HashMappingTime) {
 
 }
 
-
+*/
 
 
 #endif //VDS_PROJECT_TESTS_H
