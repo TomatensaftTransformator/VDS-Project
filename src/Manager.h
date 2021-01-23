@@ -44,11 +44,7 @@ namespace ClassProject {
     public: 
         size_t operator()(const ite_id& key) const
         {
-            size_t a = key.i;
-            size_t b = key.t;
-            a = (a << 12) + b;
-            b = key.e;
-            return (a << 12) + b;
+            return (((key.i  << 12)  +  key.t) << 12) + key.e;
         } 
     }; 
 
@@ -88,13 +84,8 @@ namespace ClassProject {
         class MyHashFunction2 { 
     public: 
         size_t operator()(const Unique_identifier& key) const
-        { 
-            
-            size_t a = key.id_low;
-            size_t b = key.id_high;
-            a = (a << 12) + b;
-            b = key.top_var.size();
-            return (a << 12) + b;
+        {
+            return (((key.id_low  << 12)  +  key.id_high) << 12) + key.top_var.size();
         } 
     }; 
 
