@@ -54,7 +54,7 @@ namespace ClassProject {
         FALSE_entry.is_variable = false;
 
         unique_table[ID_FALSE] = FALSE_entry;
-        unique_table_reverse[FALSE_identifier] = ID_FALSE;    
+        unique_table_reverse[FALSE_identifier] = ID_FALSE;
     }
 
 
@@ -68,15 +68,8 @@ namespace ClassProject {
         if(t == 1 && e== 0) return i;
 
 
-        //case i) all 3 values are boolean then just evaluate i*t + not(i)*e
-        if((i == 0 || i == 1) && (t == 0 || t == 1) && (e == 0 || e == 1)){
-            bool i_b = (bool)i;
-            bool t_b = (bool)t;
-            bool e_b = (bool)e;
-
-            bool ite_evaluation;
-            ite_evaluation = i&&t || (!i)&&e;
-            return (BDD_ID)ite_evaluation;
+        if((i == 0 || i == 1) && (t == 0 || t == 1) && (e == 0 || e == 1)){ //alll 3 values are boolean
+            return (BDD_ID)i&&t || (!i)&&e;
         }
         //end of terminal cases
 
