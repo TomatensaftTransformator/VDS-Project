@@ -220,21 +220,6 @@ TEST(ManagerTest, createVarTest) {
 
     ClassProject::BDD_ID id_a = manager.createVar("a");
     
-    
-    
-    
-    ClassProject::Unique_identifier identifier_a;
-    identifier_a.id_high = ClassProject::ID_TRUE;
-    identifier_a.id_low  = ClassProject::ID_FALSE;
-    identifier_a.top_var = "a";
-
-    ClassProject::Unique_table_entry entry_a;
-    entry_a.id = 2;
-    entry_a.label = "a";
-    entry_a.identifier = identifier_a;
-    entry_a.is_variable = true;
-
-
 
     EXPECT_EQ(manager.getTopVarName(id_a), "a");
     EXPECT_EQ(manager.topVar(id_a), id_a);
@@ -1148,6 +1133,58 @@ TEST(ManagerTest, UniqueTable3Test) {
     EXPECT_EQ(manager.coFactorFalse(final_result_4), new_e_node);
     EXPECT_EQ(manager.isVariable(final_result_4) , false);
 }
+
+
+
+
+
+
+
+
+TEST(ManagerTest, UniqueTable8Test) {
+    ClassProject::Manager manager;
+
+
+    ClassProject::BDD_ID id_x = manager.createVar("x");
+    ClassProject::BDD_ID id_y = manager.createVar("y");
+    ClassProject::BDD_ID id_z = manager.createVar("z");
+    
+
+
+    ClassProject::BDD_ID id_x_neg = manager.neg(id_x);
+    ClassProject::BDD_ID id_y_neg = manager.neg(id_y);
+    ClassProject::BDD_ID id_z_neg = manager.neg(id_z);
+    
+
+    ClassProject::BDD_ID h1 = manager.and2(manager.and2(id_x_neg, id_y_neg), id_z);
+    ClassProject::BDD_ID h2 = manager.and2(manager.and2(id_x_neg, id_y), id_z);
+    ClassProject::BDD_ID h3 = manager.and2(manager.and2(id_x, id_y), id_z_neg);
+    ClassProject::BDD_ID h4 = manager.and2(manager.and2(id_x, id_y), id_z);
+
+
+
+    ClassProject::BDD_ID f = manager.or2(manager.or2(manager.or2(h1, h2), h3), h4);
+
+    ClassProject::BDD_ID g = manager.or2(manager.and2(id_x, id_y), manager.and2(id_x_neg, id_z));
+
+
+
+    EXPECT_EQ(f, g);
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -11,7 +11,7 @@
 namespace ClassProject {
 
 
-    ite_id::ite_id(BDD_ID x, BDD_ID y, BDD_ID z){
+    Manager::ite_id::ite_id(BDD_ID x, BDD_ID y, BDD_ID z){
         i = x;
         t = y;
         e = z;

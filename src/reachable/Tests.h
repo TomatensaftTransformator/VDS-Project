@@ -105,7 +105,7 @@ TEST(managerTest, xnor2Test) {
 
 
 
-
+/*
 
 TEST(managerTest, initialStateTest) {
 
@@ -168,9 +168,9 @@ TEST(managerTest, initialState2Test) {
 
 
 }
+*/
 
-
-
+/*
 TEST(managerTest, initialState3Test) {
 
     
@@ -194,7 +194,7 @@ TEST(managerTest, initialState3Test) {
 
 
 }
-
+*/
 
 TEST(managerTest, HowTo_Example) {
     ClassProject::Reachable comp(2);
