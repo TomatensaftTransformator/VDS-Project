@@ -32,7 +32,7 @@ TEST(managerTest, initTest) {
     ClassProject::Reachable comp2(0);
 
     comp2.init();
-    EXPECT_EQ(comp2.stateSize, 0);
+    EXPECT_EQ(comp2.getStateSize(), 0);
 
 
     std::vector<BDD_ID> states2 = comp2.getStates();
@@ -44,7 +44,6 @@ TEST(managerTest, initTest) {
     //int i = -10;
     //ClassProject::Reachable comp3(i);
     //comp3.init();
-    //EXPECT_EQ(comp3.stateSize, i);
 }
 
 
