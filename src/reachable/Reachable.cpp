@@ -5,10 +5,7 @@
 #include "Reachable.h"
 
 namespace ClassProject {
-    
-    {stateSize=x;}
-
-    
+       
     Reachable::Reachable(){
     stateSize=x;
         for (int i = 0; i< stateSize; i++){
