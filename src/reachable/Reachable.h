@@ -17,7 +17,7 @@ namespace ClassProject {
     ///
     class Reachable : public ReachableInterface {
         public:
-            //using ReachableInterface::ReachableInterface; //get constructor of ReachableInterface!
+            using ReachableInterface::ReachableInterface; //get constructor of ReachableInterface!
             //Reachable() = delete;
 
             /**
