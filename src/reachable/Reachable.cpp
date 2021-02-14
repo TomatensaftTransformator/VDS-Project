@@ -7,19 +7,19 @@
 namespace ClassProject {
 
     void Reachable::init(){
-        for (int i = 0; i< getStateSize(); i++){
+        for (int i = 0; i< stateSize; i++){
             BDD_ID var_id = createVar("s" + std::to_string(i));
             states.push_back(var_id);
         }
 
 
-        for (int i = 0; i< getStateSize(); i++){
+        for (int i = 0; i< stateSize; i++){
             BDD_ID var_id = createVar("s'" + std::to_string(i));
             nextStates.push_back(var_id);
         }
 
 
-        for (int i = 0; i< getStateSize(); i++){
+        for (int i = 0; i< stateSize; i++){
             stateTransitions.push_back(False()); //default stateTransition
         }
     }
@@ -41,7 +41,7 @@ namespace ClassProject {
     void Reachable::setDelta(const std::vector<BDD_ID> &transitionFunctions){
         //transition-function delta is given by the user
         //one logic function for each bit
-        if(transitionFunctions.size() != getStateSize()){
+        if(transitionFunctions.size() != stateSize){
             //give error message
             return;
         }
@@ -133,12 +133,12 @@ namespace ClassProject {
 
     bool Reachable::is_reachable(const std::vector<bool>& stateVector){
         //check if the given state is in the set of reachable-states
-        if(stateVector.size() != getStateSize()){
+        if(stateVector.size() != stateSize){
             //give error message
             return false;
         }
         BDD_ID tmp = reachableStatesCharacteristicFunction;
-        for (int i = 0; i < getStateSize(); i++) {
+        for (int i = 0; i < stateSize; i++) {
             if (topVar(tmp) == states[i]) {
                 if (stateVector[i]){
                     tmp = coFactorTrue(tmp);
