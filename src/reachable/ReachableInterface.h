@@ -63,8 +63,9 @@ namespace ClassProject{
         virtual bool is_reachable(const std::vector<bool>& stateVector) = 0;
 
 
-        unsigned int getStateSize() {return stateSize;}
-    private:
+        //unsigned int getStateSize() {return stateSize;}
+    //private:
+      protected:
         unsigned int stateSize;
     };
 }
