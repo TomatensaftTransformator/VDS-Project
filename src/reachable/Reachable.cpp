@@ -51,7 +51,7 @@ namespace ClassProject {
 
     void Reachable::setInitState(const std::vector<bool>& stateVector){
         //initial state is set by the user
-        if(stateVector.size() != getStateSize()){
+        if(stateVector.size() != stateSize){
             //give error message
             std::cout << "Size of InitialStateVector and states of FSM do not fit!" << std::endl;
             initialStateCharacteristicFunction = False();
@@ -61,7 +61,7 @@ namespace ClassProject {
         //compute characteristic boolean-function for initial-state
         //characteristic-function(state) = 1 <-> state = initial-state
         BDD_ID tmp = True();
-        for(int i = 0; i < getStateSize(); i++){
+        for(int i = 0; i < stateSize; i++){
             tmp = and2(tmp, xnor2(stateVector[i], states[i]));
         }
         initialStateCharacteristicFunction = tmp;
@@ -71,14 +71,14 @@ namespace ClassProject {
         //output is BDD_ID of a boolean function that represents the set of reachable-states
         //compute transition-relation
         
-        for (int i =0; i < getStateSize(); i++) {
+        for (int i =0; i < stateSize; i++) {
             //BDD_ID x = or2(and2(nextStates[i], stateTransitions[i]), and2(neg(nextStates[i]), neg(stateTransitions[i])));
             BDD_ID x = xnor2(nextStates[i], stateTransitions[i]);
             transitionRelationBitwise.push_back(x);
         }
 
         BDD_ID tmp = True();
-        for(int i = 0; i < getStateSize(); i++){
+        for(int i = 0; i < stateSize; i++){
             tmp = and2(tmp, transitionRelationBitwise[i]);
         }
         transitionRelation = tmp;
@@ -96,7 +96,7 @@ namespace ClassProject {
             BDD_ID img;
 
             //existential quantifier: state_variable
-            for (int i = 0 ; i < getStateSize(); i++){
+            for (int i = 0 ; i < stateSize; i++){
                 tmp = or2(coFactorTrue(tmp, states[i]), coFactorFalse(tmp, states[i]));
             }
 
@@ -110,7 +110,7 @@ namespace ClassProject {
             
             tmp = True();
             //rename next_s to s in image_function
-            for (int i = 0; i< getStateSize(); i++) {
+            for (int i = 0; i< stateSize; i++) {
                 tmp = and2(tmp, xnor2(states[i], nextStates[i])); //AND(state[i] == nextState[i])
             }
             
@@ -118,7 +118,7 @@ namespace ClassProject {
             
             
             //existential quantifier: nextStateVariables
-            for (int i = 0 ; i < getStateSize(); i++){
+            for (int i = 0 ; i <stateSize; i++){
                 img = or2(coFactorTrue(img, nextStates[i]), coFactorFalse(img, nextStates[i]));
             }
             //now img function depens on the stateVariables!
