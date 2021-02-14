@@ -59,7 +59,15 @@ jobs:
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ./src/reachable/VDSProject_reachable
-
+      
+    - name: TestBench
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      # Execute tests defined by the CMake configuration.  
+      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+      run: ./src/bench/VDSProject_bench
+      
+     
     #- name: Ctest
       #working-directory: ${{runner.workspace}}/build/src/test
       #shell: bash
