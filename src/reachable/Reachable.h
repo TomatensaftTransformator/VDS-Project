@@ -17,9 +17,9 @@ namespace ClassProject {
     ///
     class Reachable : public ReachableInterface {
         public:
-            using ReachableInterface::ReachableInterface; //get constructor of ReachableInterface!
+            //using ReachableInterface::ReachableInterface; //get constructor of ReachableInterface!
             //Reachable() = delete;
-
+            ReachableInterface::ReachableInterface : Reachable(unsigned int x);
             /**
              * Constructor creates stateSize state bits for the user
              * @param stateSize state size
