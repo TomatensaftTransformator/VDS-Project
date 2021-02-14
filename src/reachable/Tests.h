@@ -19,7 +19,7 @@ TEST(managerTest, initTest) {
     
     ClassProject::Reachable comp(10);
     
-    comp.init();
+    //comp.init();
     EXPECT_EQ(comp.getStateSize(), 10);
 
     std::vector<BDD_ID> states = comp.getStates();
@@ -31,7 +31,7 @@ TEST(managerTest, initTest) {
 
     ClassProject::Reachable comp2(0);
 
-    comp2.init();
+    //comp2.init();
     EXPECT_EQ(comp2.getStateSize(), 0);
 
 
@@ -44,7 +44,6 @@ TEST(managerTest, initTest) {
     //int i = -10;
     //ClassProject::Reachable comp3(i);
     //comp3.init();
-    //EXPECT_EQ(comp3.getStateSize(), i);
 }
 
 
@@ -55,7 +54,7 @@ TEST(managerTest, xnorTest) {
     
     ClassProject::Reachable comp(10);
     
-    comp.init();
+    //comp.init();
 
     EXPECT_EQ(comp.xnor2(comp.True(), comp.True()), comp.True());
     EXPECT_EQ(comp.xnor2(comp.True(), comp.False()), comp.False());
@@ -89,7 +88,7 @@ TEST(managerTest, xnor2Test) {
     
     ClassProject::Reachable comp(10);
     
-    comp.init();
+    //comp.init();
 
     BDD_ID id_a = comp.createVar("a");
     BDD_ID id_b = comp.createVar("b");
@@ -112,7 +111,7 @@ TEST(managerTest, initialStateTest) {
     
     ClassProject::Reachable comp(3);
     
-    comp.init();
+    //comp.init();
 
     auto states = comp.getStates();
     std::vector<BDD_ID> functions;
@@ -144,7 +143,7 @@ TEST(managerTest, initialState2Test) {
     
     ClassProject::Reachable comp(5);
     
-    comp.init();
+    //comp.init();
 
     auto states = comp.getStates();
     std::vector<BDD_ID> functions;
@@ -176,7 +175,7 @@ TEST(managerTest, initialState3Test) {
     
     ClassProject::Reachable comp(5);
     
-    comp.init();
+    //comp.init();
 
     auto states = comp.getStates();
     std::vector<BDD_ID> functions;
@@ -199,7 +198,7 @@ TEST(managerTest, initialState3Test) {
 TEST(managerTest, HowTo_Example) {
     ClassProject::Reachable comp(2);
     
-    comp.init();
+    //comp.init();
     
     auto states = comp.getStates();
     std::vector<BDD_ID> functions;
@@ -228,7 +227,7 @@ TEST(managerTest, HowTo_Example) {
 TEST(managerTest, FSM1Test) {
     ClassProject::Reachable comp(3);
     
-    comp.init();
+    //comp.init();
     
     auto states = comp.getStates();
     std::vector<BDD_ID> functions;
@@ -263,7 +262,7 @@ TEST(managerTest, FSM1Test) {
 TEST(managerTest, FSM2Test) {
     ClassProject::Reachable comp(3);
     
-    comp.init();
+    //comp.init();
     
     auto states = comp.getStates();
     std::vector<BDD_ID> functions;
@@ -299,7 +298,7 @@ TEST(managerTest, FSM2Test) {
 TEST(managerTest, FSM3Test) {
     ClassProject::Reachable comp(4);
     
-    comp.init();
+    //comp.init();
     
     auto states = comp.getStates();
     std::vector<BDD_ID> functions;
@@ -344,7 +343,7 @@ TEST(managerTest, FSM3Test) {
 TEST(managerTest, FSM4Test) {
     ClassProject::Reachable comp(3);
     
-    comp.init();
+    //comp.init();
     
     auto states = comp.getStates();
     std::vector<BDD_ID> functions;
@@ -388,7 +387,7 @@ TEST(managerTest, FSM4Test) {
 TEST(managerTest, FSM5Test) {
     ClassProject::Reachable comp(4);
     
-    comp.init();
+    //comp.init();
     
     auto states = comp.getStates();
     std::vector<BDD_ID> functions;
@@ -433,7 +432,7 @@ TEST(managerTest, FSM5Test) {
 TEST(managerTest, privateFunctionsTest) {
     ClassProject::Reachable comp(4);
     
-    comp.init();
+    //comp.init();
     
     auto states = comp.getStates();
     EXPECT_EQ(comp.getStates().size(), 4);

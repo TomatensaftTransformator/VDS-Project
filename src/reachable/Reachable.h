@@ -17,8 +17,9 @@ namespace ClassProject {
     ///
     class Reachable : public ReachableInterface {
         public:
-            using ReachableInterface::ReachableInterface; //get constructor of ReachableInterface!
-
+            //using ReachableInterface::ReachableInterface; //get constructor of ReachableInterface!
+            explicit Reachable(unsigned int x) : ReachableInterface(x) {init(x);};
+            void init(unsigned int x);
 
 
             /// performs a "xnor" of two boolean expressions
@@ -53,8 +54,9 @@ namespace ClassProject {
             /// @warning makes only sense to use after FSM has been set-up and compute_reachable_state has been used
             bool is_reachable(const std::vector<bool>& stateVector);
             
-            void init();
+            //void init();
 
+            unsigned int getStateSize() {return stateSize;}
 
             BDD_ID createInputVariable(const std::string &label);
 
