@@ -25,8 +25,8 @@ namespace ClassProject {
              * @param stateSize state size
              */
             //explicit 
-            Reachable(unsigned int x);
-            ~Reachable() = default;
+            //Reachable(unsigned int x);
+            //~Reachable() = default;
 
 
             /// performs a "xnor" of two boolean expressions
