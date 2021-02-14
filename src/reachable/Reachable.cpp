@@ -19,34 +19,27 @@ namespace ClassProject {
             nextStates.push_back(var_id);
         }
 
-
-        for (int i = 0; i< stateSize; i++){
-            stateTransitions.push_back(False()); //default stateTransition
-        }
+        //this will cause a state transition to (0000...0); thus thats not the same as empty state-transitions
+        //for (int i = 0; i< stateSize; i++){
+        //    stateTransitions.push_back(False()); //default stateTransition
+        //}
     }
-
-
-
 
     BDD_ID Reachable::xnor2(BDD_ID a, BDD_ID b){
         return neg(xor2(a, b));
     }
 
-
-
     const std::vector<BDD_ID>& Reachable::getStates() const{
         return states;
     }
 
-
     void Reachable::setDelta(const std::vector<BDD_ID> &transitionFunctions){
         //transition-function delta is given by the user
-        //one logic function for each bit
+        //one boolean function for each bit
         if(transitionFunctions.size() != stateSize){
             //give error message
             return;
         }
-        //size is fine
         stateTransitions = transitionFunctions;
     }
 
@@ -55,7 +48,7 @@ namespace ClassProject {
         if(stateVector.size() != stateSize){
             //give error message
             std::cout << "Size of InitialStateVector and states of FSM do not fit!" << std::endl;
-            initialStateCharacteristicFunction = False();
+            //initialStateCharacteristicFunction = False();
             return;
         }
 
@@ -71,9 +64,14 @@ namespace ClassProject {
     BDD_ID Reachable::compute_reachable_states(){
         //output is BDD_ID of a boolean function that represents the set of reachable-states
         //compute transition-relation
+
+        //if no transition-function has been set-up yet, only the initialstate is reachable
+        if(stateTransitions.size() == 0){
+            reachableStatesCharacteristicFunction = initialStateCharacteristicFunction;
+            return reachableStatesCharacteristicFunction;
+        }
         
         for (int i =0; i < stateSize; i++) {
-            //BDD_ID x = or2(and2(nextStates[i], stateTransitions[i]), and2(neg(nextStates[i]), neg(stateTransitions[i])));
             BDD_ID x = xnor2(nextStates[i], stateTransitions[i]);
             transitionRelationBitwise.push_back(x);
         }
@@ -122,8 +120,8 @@ namespace ClassProject {
             for (int i = 0 ; i <stateSize; i++){
                 img = or2(coFactorTrue(img, nextStates[i]), coFactorFalse(img, nextStates[i]));
             }
-            //now img function depens on the stateVariables!
 
+            //now img function depens on the stateVariables!
             characteristicFunctionIteration = or2(characteristicFunction, img); //epxand the set of reachableStates
             b = (characteristicFunction != characteristicFunctionIteration); // loop ends when equality holds.
         }
@@ -133,7 +131,6 @@ namespace ClassProject {
     }
 
     bool Reachable::is_reachable(const std::vector<bool>& stateVector){
-        //check if the given state is in the set of reachable-states
         if(stateVector.size() != stateSize){
             //give error message
             return false;
@@ -153,19 +150,13 @@ namespace ClassProject {
         return false;
     }
             
-
-
     BDD_ID Reachable::getInitalStateCharacteristic(){
         return initialStateCharacteristicFunction;
     }
-
-
 
     BDD_ID Reachable::createInputVariable(const std::string &label){
         BDD_ID id = createVar(label);
         inputVariables.push_back(id);
         return id;
     }
-
-
 }

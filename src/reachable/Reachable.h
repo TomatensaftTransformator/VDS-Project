@@ -54,7 +54,6 @@ namespace ClassProject {
             /// @warning makes only sense to use after FSM has been set-up and compute_reachable_state has been used
             bool is_reachable(const std::vector<bool>& stateVector);
             
-            //void init();
 
             unsigned int getStateSize() {return stateSize;}
 
@@ -72,10 +71,9 @@ namespace ClassProject {
 
             std::vector<BDD_ID> inputVariables; 
 
-            BDD_ID transitionRelation;
-            BDD_ID initialStateCharacteristicFunction;
-            BDD_ID reachableStatesCharacteristicFunction;
-
+            BDD_ID transitionRelation = False();
+            BDD_ID initialStateCharacteristicFunction = False();    //init to false which represents the empty-set!
+            BDD_ID reachableStatesCharacteristicFunction = False();
     };
 
 }

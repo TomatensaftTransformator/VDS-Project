@@ -104,97 +104,6 @@ TEST(managerTest, xnor2Test) {
 
 
 
-/*
-
-TEST(managerTest, initialStateTest) {
-
-    
-    ClassProject::Reachable comp(3);
-    
-    //comp.init();
-
-    auto states = comp.getStates();
-    std::vector<BDD_ID> functions;
-
-    auto s0 = states.at(0);
-    auto s1 = states.at(1);
-    auto s2 = states.at(2);
-
-    comp.setInitState({false, false, false});
-
-    BDD_ID characteristicFunction = comp.getInitalStateCharacteristic();
-
-    EXPECT_EQ(comp.coFactorFalse(comp.coFactorFalse(comp.coFactorFalse(characteristicFunction))), comp.True());
-    EXPECT_EQ(comp.coFactorFalse(comp.coFactorTrue(comp.coFactorFalse(characteristicFunction))), comp.False());
-    EXPECT_EQ(comp.coFactorFalse(comp.coFactorFalse(comp.coFactorTrue(characteristicFunction))), comp.False());
-    EXPECT_EQ(comp.coFactorTrue(comp.coFactorFalse(comp.coFactorFalse(characteristicFunction))), comp.False());
-    EXPECT_EQ(comp.coFactorTrue(comp.coFactorTrue(comp.coFactorTrue(characteristicFunction))), comp.False());
-
-    EXPECT_EQ(comp.topVar(characteristicFunction), s0);
-    EXPECT_EQ(comp.topVar(comp.coFactorFalse(characteristicFunction)), s1);
-    EXPECT_EQ(comp.topVar(comp.coFactorFalse(comp.coFactorFalse(characteristicFunction))), s2);
-
-}
-
-
-
-TEST(managerTest, initialState2Test) {
-
-    
-    ClassProject::Reachable comp(5);
-    
-    //comp.init();
-
-    auto states = comp.getStates();
-    std::vector<BDD_ID> functions;
-
-    auto s0 = states.at(0);
-    auto s1 = states.at(1);
-    auto s2 = states.at(2);
-
-    comp.setInitState({true, false, false, true, false});
-
-    BDD_ID characteristicFunction = comp.getInitalStateCharacteristic();
-
-    EXPECT_EQ(comp.coFactorFalse(comp.coFactorTrue(comp.coFactorFalse(comp.coFactorFalse(comp.coFactorTrue(characteristicFunction))))), comp.True());
-    EXPECT_EQ(comp.coFactorFalse(characteristicFunction), comp.False());
-    EXPECT_EQ(comp.coFactorTrue(comp.coFactorTrue(characteristicFunction)), comp.False());
-    EXPECT_EQ(comp.coFactorTrue(comp.coFactorFalse(comp.coFactorTrue(characteristicFunction))), comp.False());
-
-
-
-    EXPECT_EQ(comp.topVar(characteristicFunction), s0);
-
-
-}
-*/
-
-/*
-TEST(managerTest, initialState3Test) {
-
-    
-    ClassProject::Reachable comp(5);
-    
-    //comp.init();
-
-    auto states = comp.getStates();
-    std::vector<BDD_ID> functions;
-
-    auto s0 = states.at(0);
-    auto s1 = states.at(1);
-    auto s2 = states.at(2);
-
-    comp.setInitState({true, false, false, true});
-
-    BDD_ID characteristicFunction = comp.getInitalStateCharacteristic();
-
-
-    EXPECT_EQ(characteristicFunction, comp.False());
-
-
-}
-*/
-
 TEST(managerTest, HowTo_Example) {
     ClassProject::Reachable comp(2);
     
@@ -328,14 +237,22 @@ TEST(managerTest, FSM3Test) {
     ASSERT_TRUE(comp.is_reachable({true,true, true, true}));
 
 
-    ASSERT_FALSE(comp.is_reachable({false, false, false, false}));
-    ASSERT_FALSE(comp.is_reachable({true, false, true, false}));
-    ASSERT_FALSE(comp.is_reachable({false, true, false, false}));
-    ASSERT_FALSE(comp.is_reachable({false, false, true, false}));
-    ASSERT_FALSE(comp.is_reachable({false, false, false, true}));
-    ASSERT_FALSE(comp.is_reachable({false, true, true, false}));
-    ASSERT_FALSE(comp.is_reachable({false, true, true, true}));
 
+
+    for(bool b0 : {false, true}){
+        for(bool b1 : {false, true}){
+            for(bool b2 : {false, true}){
+                for(bool b3 : {false, true}){
+                    if (b0 == true && b1 == false && b2 == false && b3 == false) continue;
+                    if (b0 == true && b1 == true && b2 == false && b3 == false) continue;
+                    if (b0 == true && b1 == true && b2 == true && b3 == false) continue;
+                    if (b0 == true && b1 == true && b2 == true && b3 == true) continue;
+
+                    ASSERT_FALSE(comp.is_reachable({b0, b1, b2, b3}));
+                }
+            }
+        }
+    }
 }
 
 
@@ -368,7 +285,6 @@ TEST(managerTest, FSM4Test) {
 
     comp.compute_reachable_states();
 
-    //FSM has only transition to (101); init-state=(1,1,1)
     ASSERT_TRUE(comp.is_reachable({true,true, true}));
     ASSERT_TRUE(comp.is_reachable({false,true, true}));
     ASSERT_TRUE(comp.is_reachable({true,false, true}));
@@ -377,8 +293,6 @@ TEST(managerTest, FSM4Test) {
     ASSERT_TRUE(comp.is_reachable({false,true, false}));
     ASSERT_TRUE(comp.is_reachable({true,false, false}));
     ASSERT_TRUE(comp.is_reachable({false,false, false}));
-
-
 }
 
 
@@ -411,7 +325,6 @@ TEST(managerTest, FSM5Test) {
 
     comp.compute_reachable_states();
 
-    //FSM has only transition to (101); init-state=(1,1,1)
     ASSERT_TRUE(comp.is_reachable({true,false, false, true}));
     ASSERT_TRUE(comp.is_reachable({true, true, false, false}));
     ASSERT_TRUE(comp.is_reachable({false,true, true, false}));
@@ -429,11 +342,108 @@ TEST(managerTest, FSM5Test) {
 
 
 
+
+
+TEST(managerTest, FSM6Test) {
+    ClassProject::Reachable comp(3);
+        
+    auto states = comp.getStates();
+    std::vector<BDD_ID> functions;
+
+    auto s0 = states.at(0);
+    auto s1 = states.at(1);
+    auto s2 = states.at(2);
+
+    comp.setInitState({true,true, true});
+
+    comp.compute_reachable_states();
+
+    //FSM only init state is reachable
+    ASSERT_TRUE(comp.is_reachable({true,true, true}));
+
+    ASSERT_FALSE(comp.is_reachable({false, false, false}));
+    ASSERT_FALSE(comp.is_reachable({false, false, true}));
+    ASSERT_FALSE(comp.is_reachable({false,  true, false}));
+    ASSERT_FALSE(comp.is_reachable({false,true, true}));
+    ASSERT_FALSE(comp.is_reachable({true,false, false}));
+    ASSERT_FALSE(comp.is_reachable({true,false, true}));
+    ASSERT_FALSE(comp.is_reachable({true,true, false}));
+    //ASSERT_FALSE(comp.is_reachable({true,true, true}));
+}
+
+
+
+
+
+TEST(managerTest, FSM7Test) {
+    ClassProject::Reachable comp(3);
+        
+    auto states = comp.getStates();
+    std::vector<BDD_ID> functions;
+
+    auto s0 = states.at(0);
+    auto s1 = states.at(1);
+    auto s2 = states.at(2);
+
+    comp.compute_reachable_states();
+
+
+    ASSERT_FALSE(comp.is_reachable({false, false, false}));
+    ASSERT_FALSE(comp.is_reachable({false, false, true}));
+    ASSERT_FALSE(comp.is_reachable({false,  true, false}));
+    ASSERT_FALSE(comp.is_reachable({false,true, true}));
+    ASSERT_FALSE(comp.is_reachable({true,false, false}));
+    ASSERT_FALSE(comp.is_reachable({true,false, true}));
+    ASSERT_FALSE(comp.is_reachable({true,true, false}));
+}
+
+
+
+
+TEST(managerTest, FSM8Test) {
+    ClassProject::Reachable comp(4);
+        
+    auto states = comp.getStates();
+    std::vector<BDD_ID> functions;
+
+    auto s0 = states.at(0);
+    auto s1 = states.at(1);
+    auto s2 = states.at(2);
+    auto s3 = states.at(3);
+
+    comp.setInitState({true,true, false, false});
+
+    functions.push_back(comp.neg(comp.and2(s0, comp.and2(s1, comp.and2(s2, s3))))); //s0' = not ( s0 and s1 and s2 and s3)
+    functions.push_back(comp.neg(comp.and2(s0, comp.and2(s1, comp.and2(s2, s3))))); //s1' = not ( s0 and s1 and s2 and s3)
+    functions.push_back(comp.xnor2(s0, s1)); //s2' = (s1 = s2)
+    functions.push_back(comp.xnor2(s2, s3)); //s3' = (s3 = s4)
+    comp.setDelta(functions);
+    comp.compute_reachable_states();
+
+    ASSERT_TRUE(comp.is_reachable({false, false, true, true}));
+    ASSERT_TRUE(comp.is_reachable({true,true, false, false}));
+    ASSERT_TRUE(comp.is_reachable({true,true, true, true}));
+
+
+    for(bool b0 : {false, true}){
+        for(bool b1 : {false, true}){
+            for(bool b2 : {false, true}){
+                for(bool b3 : {false, true}){
+                    if (b0 == true && b1 == true && b2 == true && b3 == true) continue;
+                    if (b0 == false && b1 == false && b2 == true && b3 == true) continue;
+                    if (b0 == true && b1 == true && b2 == false && b3 == false) continue;
+
+                    ASSERT_FALSE(comp.is_reachable({b0, b1, b2, b3}));
+                }
+            }
+        }
+    }
+}
+
+
 TEST(managerTest, privateFunctionsTest) {
     ClassProject::Reachable comp(4);
-    
-    //comp.init();
-    
+        
     auto states = comp.getStates();
     EXPECT_EQ(comp.getStates().size(), 4);
 
