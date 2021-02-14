@@ -55,6 +55,7 @@ namespace ClassProject {
             
             void init();
 
+            unsigned int getStateSize() {return stateSize;}
 
             BDD_ID createInputVariable(const std::string &label);
 
