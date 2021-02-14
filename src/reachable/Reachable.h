@@ -18,16 +18,8 @@ namespace ClassProject {
     class Reachable : public ReachableInterface {
         public:
             //using ReachableInterface::ReachableInterface; //get constructor of ReachableInterface!
-            //Reachable() = delete;
             explicit Reachable(unsigned int x) : ReachableInterface(x) {init(x);};
             void init(unsigned int x);
-            /**
-             * Constructor creates stateSize state bits for the user
-             * @param stateSize state size
-             */
-            //explicit 
-            //Reachable(unsigned int x);
-            //~Reachable() = default;
 
 
             /// performs a "xnor" of two boolean expressions
