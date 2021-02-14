@@ -19,7 +19,7 @@ TEST(managerTest, initTest) {
     
     ClassProject::Reachable comp(10);
     
-    comp.init();
+    //comp.init();
     EXPECT_EQ(comp.getStateSize(), 10);
 
     std::vector<BDD_ID> states = comp.getStates();
@@ -31,7 +31,7 @@ TEST(managerTest, initTest) {
 
     ClassProject::Reachable comp2(0);
 
-    comp2.init();
+    //comp2.init();
     EXPECT_EQ(comp2.getStateSize(), 0);
 
 
@@ -54,7 +54,7 @@ TEST(managerTest, xnorTest) {
     
     ClassProject::Reachable comp(10);
     
-    comp.init();
+    //comp.init();
 
     EXPECT_EQ(comp.xnor2(comp.True(), comp.True()), comp.True());
     EXPECT_EQ(comp.xnor2(comp.True(), comp.False()), comp.False());
