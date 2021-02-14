@@ -17,8 +17,15 @@ namespace ClassProject {
     ///
     class Reachable : public ReachableInterface {
         public:
-            using ReachableInterface::ReachableInterface; //get constructor of ReachableInterface!
+            //using ReachableInterface::ReachableInterface; //get constructor of ReachableInterface!
+            Reachable() = delete;
 
+            /**
+             * Constructor creates stateSize state bits for the user
+             * @param stateSize state size
+             */
+            explicit Reachable(unsigned int x);
+            virtual ~Reachable() = default;
 
 
             /// performs a "xnor" of two boolean expressions
@@ -53,7 +60,7 @@ namespace ClassProject {
             /// @warning makes only sense to use after FSM has been set-up and compute_reachable_state has been used
             bool is_reachable(const std::vector<bool>& stateVector);
             
-            void init();
+            //void init();
 
             unsigned int getStateSize() {return stateSize;}
 
