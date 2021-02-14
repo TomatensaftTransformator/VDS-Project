@@ -5,8 +5,12 @@
 #include "Reachable.h"
 
 namespace ClassProject {
+    
+    {stateSize=x;}
 
-    void Reachable::init(){
+    
+    Reachable::Reachable(){
+    stateSize=x;
         for (int i = 0; i< stateSize; i++){
             BDD_ID var_id = createVar("s" + std::to_string(i));
             states.push_back(var_id);
