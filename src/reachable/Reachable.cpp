@@ -6,7 +6,7 @@
 
 namespace ClassProject {
        
-    Reachable::Reachable(unsigned int x) : ReachableInterface(x){
+    Reachable::init(unsigned int x){
     stateSize=x;
         for (int i = 0; i< stateSize; i++){
             BDD_ID var_id = createVar("s" + std::to_string(i));
