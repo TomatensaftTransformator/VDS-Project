@@ -1622,6 +1622,53 @@ TEST(ManagerTest, DuplicateEntryTest) {
     EXPECT_EQ(s, manager.uniqueTableSize());
 
 }
+
+
+
+
+
+TEST(ManagerTest, SatisfiableTest) {
+    ClassProject::Manager manager;
+
+
+    ClassProject::BDD_ID a = manager.createVar("a");
+    ClassProject::BDD_ID b = manager.createVar("b");
+    ClassProject::BDD_ID c = manager.createVar("c");
+    ClassProject::BDD_ID d = manager.createVar("d");
+
+
+    ClassProject::BDD_ID not_a = manager.neg(a);
+    ClassProject::BDD_ID not_b = manager.neg(b);
+    ClassProject::BDD_ID not_c = manager.neg(c);
+    ClassProject::BDD_ID not_d = manager.neg(d);
+
+
+
+
+    ClassProject::BDD_ID clause1 =  manager.or2(a, not_b);
+    ClassProject::BDD_ID clause2 =  manager.or2(not_a, manager.or2(b, not_c));
+    ClassProject::BDD_ID clause3 =  manager.or2(a, manager.or2(c, d));
+    ClassProject::BDD_ID clause4 =  manager.or2(not_a, manager.or2(not_b, not_c));
+
+    
+    ClassProject::BDD_ID f = manager.and2(clause1, manager.and2(clause2, manager.and2(clause3, clause4)));
+
+
+    EXPECT_NE(f, manager.False());
+
+
+    ClassProject::BDD_ID killer = manager.and2(b, not_a);
+    ClassProject::BDD_ID f_false = manager.and2(f, killer);
+
+
+    EXPECT_EQ(f_false, manager.False());
+}
+
+
+
+
+
+
 /*
 TEST(ManagerTest, HashMappingTime) {
     ClassProject::MyHashMapT t_map;
