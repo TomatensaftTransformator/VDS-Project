@@ -7,7 +7,7 @@
 namespace ClassProject {
        
     void Reachable::init(unsigned int x){
-    stateSize=x;
+    stateSize = x;
         for (int i = 0; i< stateSize; i++){
             BDD_ID var_id = createVar("s" + std::to_string(i));
             states.push_back(var_id);
